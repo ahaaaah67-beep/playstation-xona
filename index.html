@@ -479,6 +479,11 @@ function updateReportStats() {
 
 // ── BOSHLASH ─────────────────────────────────────────────────────────────────
 async function init() {
+  // Timeout - 5 sekunddan keyin yuklanishni yopamiz
+  setTimeout(() => {
+    document.getElementById("loading").classList.add("hidden");
+    goPage("dashboard");
+  }, 5000);
   try {
     listenAll();
     document.getElementById("loading").classList.add("hidden");
