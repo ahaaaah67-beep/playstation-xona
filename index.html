@@ -15,7 +15,12 @@ input{font-family:inherit}
 .logo-sub{font-size:10px;color:#475569;margin-top:2px}
 .clock{font-size:12px;color:#64748b}
 .active-tag{background:#16a34a22;color:#22c55e;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
-.notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 8px 32px #0009;white-space:nowrap;transition:opacity 0.3s}
+.notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 8px 32px #0009;white-space:nowrap}
+.notif.hidden{display:none}
+.loading{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0f1eee;display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:16px}
+.loading.hidden{display:none}
+.spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
 .stat-card{background:#111827;border-radius:14px;padding:12px 10px;border-left:3px solid;display:flex;flex-direction:column;gap:2px}
 .stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
@@ -36,7 +41,6 @@ input{font-family:inherit}
 .info-card{background:#111827;border-radius:12px;padding:10px}
 .info-label{font-size:10px;color:#64748b;margin-bottom:3px}
 .info-val{font-size:13px;font-weight:700;color:#e2e8f0}
-.info-total{background:#16a34a22;border-radius:12px;padding:10px;grid-column:span 3}
 .order-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1e293b;font-size:13px}
 .ord-name{flex:1;color:#e2e8f0}
 .ord-right{display:flex;align-items:center;gap:5px}
@@ -45,7 +49,7 @@ input{font-family:inherit}
 .ord-amt{font-size:12px;color:#86efac;min-width:86px;text-align:right;font-weight:600}
 .cat-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none}
 .cat-scroll::-webkit-scrollbar{display:none}
-.cat-btn{border:1px solid;border-radius:20px;padding:6px 13px;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;background:#1e293b;border-color:#334155}
+.cat-btn{border:1px solid #334155;border-radius:20px;padding:6px 13px;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;background:#1e293b}
 .cat-btn.active{background:#6366f1;border-color:#818cf8}
 .cat-btn.active-green{background:#16a34a;border-color:#22c55e}
 .prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
@@ -83,22 +87,25 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
 .hist-row{display:flex;gap:10px;font-size:11px;color:#64748b;flex-wrap:wrap}
 .hist-orders{font-size:11px;color:#475569;margin-top:4px;line-height:1.6}
 .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#0a0f1e;border-top:1px solid #1e293b;display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100}
-.nav-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 16px;font-size:10px}
+.nav-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 16px;font-size:10px;color:#475569}
 .nav-btn.active{color:#818cf8}
-.nav-btn:not(.active){color:#475569}
 .nav-icon{font-size:22px}
-.exp-type-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.exp-type-btn{border:1px solid #334155;border-radius:20px;padding:5px 12px;color:#fff;font-size:11px;font-weight:600;background:#1e293b}
+.exp-type-btn{border:1px solid #334155;border-radius:20px;padding:5px 12px;color:#fff;font-size:11px;font-weight:600;background:#1e293b;margin-right:6px;margin-bottom:6px}
 .exp-type-btn.active{background:#dc2626;border-color:#ef4444}
 .hidden{display:none}
 </style>
 </head>
 <body>
 
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div style="color:#64748b;font-size:14px">Yuklanmoqda...</div>
+</div>
+
 <div id="notif" class="notif hidden"></div>
 
-<!-- ══ DASHBOARD ══ -->
-<div id="page-dashboard" class="page">
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page hidden">
   <div class="header">
     <div><div class="logo">🎮 PlayStation</div><div class="logo-sub">Boshqaruv Tizimi</div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
@@ -128,7 +135,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<!-- ══ XONA ══ -->
+<!-- XONA -->
 <div id="page-room" class="page hidden">
   <div class="header">
     <button class="back-btn" onclick="goPage('dashboard')">← Orqaga</button>
@@ -148,7 +155,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
       <div class="info-card"><div class="info-label">⏱ Vaqt</div><div class="info-val" id="r-elapsed">0d</div></div>
       <div class="info-card"><div class="info-label">🎮 O'yin</div><div class="info-val" id="r-game">0</div></div>
       <div class="info-card"><div class="info-label">🛒 Mahsulot</div><div class="info-val" id="r-ords">0</div></div>
-      <div class="info-total info-card" style="grid-column:span 3">
+      <div class="info-card" style="background:#16a34a22;grid-column:span 3">
         <div class="info-label">💰 JAMI TO'LOV</div>
         <div class="info-val" style="font-size:22px;color:#22c55e" id="r-total">0</div>
       </div>
@@ -176,7 +183,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
         <button class="btn-confirm-green" onclick="closeRoom(false)">✅ Naqd Tasdiqlash</button>
         <button class="btn-gray" onclick="hideConfirm()">Bekor</button>
       </div>
-      <div class="click-section" style="margin-top:10px">
+      <div class="click-section">
         <div class="pay-label">💳 Click / Payme orqali to'lash</div>
         <div class="confirm-line" style="font-weight:700"><span>To'lov summasi</span><span style="color:#a78bfa" id="c-click-total">0</span></div>
         <button class="btn-purple" onclick="closeRoom(true)">💳 Click / Payme Tasdiqlash</button>
@@ -191,7 +198,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<!-- ══ KASSA ══ -->
+<!-- KASSA -->
 <div id="page-kassa" class="page hidden">
   <div class="header">
     <button class="back-btn" onclick="goPage('dashboard')">← Orqaga</button>
@@ -211,18 +218,18 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
   <div class="section" style="background:#2d1b4e">
     <div class="sec-title">💳 Click / Payme Xarajat</div>
-    <p style="font-size:13px;color:#94a3b8;margin-bottom:10px">Kassadan Click orqali pul chiqsa shu yerga kiriting</p>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:10px">Kassadan Click orqali pul chiqsa</p>
     <input type="number" id="click-exp-input" placeholder="Summa (so'm)"/>
     <button class="btn-purple" onclick="addClickExpense()">💳 Click Xarajat Qo'shish</button>
   </div>
   <div class="section" style="background:#1a0a0a">
     <div class="sec-title">📦 Boshqa Xarajat</div>
-    <div class="exp-type-row">
+    <div style="display:flex;flex-wrap:wrap;margin-bottom:8px">
       <button class="exp-type-btn active" id="etype-bozorlik" onclick="setExpType('bozorlik')">🛍 Bozorlik</button>
       <button class="exp-type-btn" id="etype-kassadan" onclick="setExpType('kassadan')">💸 Kassadan</button>
       <button class="exp-type-btn" id="etype-boshqa" onclick="setExpType('boshqa')">📌 Boshqa</button>
     </div>
-    <input type="text" id="exp-name" placeholder="Nima uchun (masalan: ichimlik olib kelindi)"/>
+    <input type="text" id="exp-name" placeholder="Nima uchun"/>
     <input type="number" id="exp-amount" placeholder="Summa (so'm)"/>
     <button class="btn-red" style="margin-top:0" onclick="addExpense()">➕ Xarajat Qo'shish</button>
   </div>
@@ -234,7 +241,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<!-- ══ HISOBOT ══ -->
+<!-- HISOBOT -->
 <div id="page-report" class="page hidden">
   <div class="header">
     <button class="back-btn" onclick="goPage('dashboard')">← Orqaga</button>
@@ -248,10 +255,12 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
     <div class="stat-card" style="border-color:#f59e0b"><div class="stat-label">Sof foyda</div><div class="stat-val" style="color:#f59e0b" id="r-profit">0</div><div class="stat-sub">so'm</div></div>
   </div>
   <div class="section">
-    <div class="sec-title">💸 Xarajatlar Tahlili</div>
+    <div class="sec-title">💸 Xarajatlar</div>
     <div class="order-row"><span style="color:#94a3b8">💳 Click / Payme</span><span style="color:#a78bfa;font-weight:700" id="r-click">0 so'm</span></div>
-    <div class="order-row"><span style="color:#94a3b8">📦 Boshqa xarajat</span><span style="color:#ef4444;font-weight:700" id="r-other">0 so'm</span></div>
-    <div class="order-row" style="border-top:1px solid #334155;padding-top:8px;margin-top:4px;font-weight:700"><span>Jami xarajat</span><span style="color:#ef4444;font-size:16px" id="r-exp-total">0 so'm</span></div>
+    <div class="order-row"><span style="color:#94a3b8">📦 Boshqa</span><span style="color:#ef4444;font-weight:700" id="r-other">0 so'm</span></div>
+    <div class="order-row" style="border-top:1px solid #334155;padding-top:8px;margin-top:4px;font-weight:700">
+      <span>Jami xarajat</span><span style="color:#ef4444;font-size:16px" id="r-exp-total">0 so'm</span>
+    </div>
   </div>
   <div class="section" id="exp-list-wrap" style="display:none">
     <div class="sec-title">📋 Xarajatlar Ro'yxati</div>
@@ -265,7 +274,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
     <div class="sec-title">🎮 Xona Sessiyalari</div>
     <div id="history-list"></div>
   </div>
-  <div id="report-empty" class="centered">
+  <div id="report-empty" class="centered" style="display:none">
     <div style="font-size:56px">📋</div>
     <div class="empty-text">Hali ma'lumot yo'q</div>
   </div>
@@ -277,7 +286,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<!-- ══ SOZLAMALAR ══ -->
+<!-- SOZLAMALAR -->
 <div id="page-settings" class="page hidden">
   <div class="header"><div class="logo">⚙️ Sozlamalar</div></div>
   <div class="section">
@@ -288,8 +297,8 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
     <div class="order-row"><span>Xona 101–107</span><span style="color:#a5b4fc">28 000 so'm/soat</span></div>
   </div>
   <div class="section">
-    <div class="sec-title">🛒 Mahsulotlar — Qo'shish / O'chirish</div>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
+    <div class="sec-title">🛒 Mahsulot Qo'shish</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
       <input type="text" id="new-prod-name" placeholder="Mahsulot nomi" style="margin:0;flex:2"/>
       <input type="number" id="new-prod-price" placeholder="Narx" style="margin:0;flex:1"/>
     </div>
@@ -308,8 +317,25 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<script>
-// ── MA'LUMOTLAR ─────────────────────────────────────────────────────────────
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA-BfBE8Z2xPuEwJ8UIiS7eiycAS6_kisE",
+  authDomain: "playsteshn-e90e9.firebaseapp.com",
+  projectId: "playsteshn-e90e9",
+  storageBucket: "playsteshn-e90e9.firebasestorage.app",
+  messagingSenderId: "1086762664975",
+  appId: "1:1086762664975:web:dfeb951e3ff758eb324f7a",
+  measurementId: "G-9EBMGJPPX9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── XONALAR ──────────────────────────────────────────────────────────────────
 const ROOM_CONFIG = [
   ...Array.from({length:7},(_,i)=>({id:i+1,label:`${i+1}`,price:22000})),
   {id:8,label:"8",price:28000},{id:9,label:"9",price:28000},{id:10,label:"10",price:28000},
@@ -317,7 +343,8 @@ const ROOM_CONFIG = [
   ...Array.from({length:7},(_,i)=>({id:i+26,label:`10${i+1}`,price:28000})),
 ];
 
-let PRODUCTS = [
+// ── MAHSULOTLAR ──────────────────────────────────────────────────────────────
+window.PRODUCTS = [
   {id:1,name:"Coca-Cola",price:17000,cat:"Ichimlik",emoji:"🥤"},
   {id:2,name:"Pepsi",price:18000,cat:"Ichimlik",emoji:"🥤"},
   {id:3,name:"Fanta",price:17000,cat:"Ichimlik",emoji:"🧡"},
@@ -355,72 +382,142 @@ let PRODUCTS = [
 const CATS = ["Ichimlik","Energetik","Snak","Qurt","Fast Food"];
 const CAT_EMOJIS = {Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
 
-// STATE
-let rooms = {};
-ROOM_CONFIG.forEach(r=>{rooms[r.id]={active:false,startTime:null,orders:[],price:r.price};});
-let expenses = [];
-let cashSales = [];
-let history = [];
-let selRoom = null;
-let activeRoomCat = CATS[0];
-let kassaCat = CATS[0];
-let kassaOrders = [];
-let expType = "bozorlik";
-let newProdCat = CATS[0];
+// ── STATE ────────────────────────────────────────────────────────────────────
+window.rooms = {};
+ROOM_CONFIG.forEach(r=>{window.rooms[r.id]={active:false,startTime:null,orders:[],price:r.price};});
+window.expenses = [];
+window.cashSales = [];
+window.history = [];
+window.selRoom = null;
+window.activeRoomCat = CATS[0];
+window.kassaCat = CATS[0];
+window.kassaOrders = [];
+window.expType = "bozorlik";
+window.newProdCat = CATS[0];
 
-// ── HELPERS ─────────────────────────────────────────────────────────────────
-function fmt(n){return Number(n).toLocaleString("uz-UZ")+" so'm";}
-function fmtS(n){n=Number(n);if(n>=1000000)return(n/1000000).toFixed(1)+"mln";if(n>=1000)return(n/1000).toFixed(0)+"k";return String(n);}
-function elapsed(iso){const d=Date.now()-new Date(iso).getTime(),h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}s ${m}d`:`${m}d`;}
-function elapsedH(iso){return(Date.now()-new Date(iso).getTime())/3600000;}
-function timeNow(){return new Date().toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit"});}
-function dateStr(){return new Date().toLocaleString("uz-UZ");}
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+window.fmt = n => Number(n).toLocaleString("uz-UZ")+" so'm";
+window.fmtS = n => {n=Number(n);if(n>=1000000)return(n/1000000).toFixed(1)+"mln";if(n>=1000)return(n/1000).toFixed(0)+"k";return String(n);};
+window.elapsed = iso => {const d=Date.now()-new Date(iso).getTime(),h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}s ${m}d`:`${m}d`;};
+window.elapsedH = iso => (Date.now()-new Date(iso).getTime())/3600000;
+window.timeNow = () => new Date().toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit"});
+window.dateStr = () => new Date().toLocaleString("uz-UZ");
 
-function notify(msg,color="#22c55e"){
+window.notify = (msg, color="#22c55e") => {
   const el=document.getElementById("notif");
   el.textContent=msg;el.style.background=color;el.classList.remove("hidden");
   setTimeout(()=>el.classList.add("hidden"),2800);
+};
+
+window.rGame = rid => {const r=window.rooms[rid];if(!r||!r.active)return 0;return Math.round(window.elapsedH(r.startTime)*r.price);};
+window.rOrds = rid => (window.rooms[rid]?.orders||[]).reduce((s,o)=>s+o.price*o.qty,0);
+window.rTotal = rid => window.rGame(rid)+window.rOrds(rid);
+
+// ── FIREBASE SYNC ────────────────────────────────────────────────────────────
+async function saveRoom(rid) {
+  await setDoc(doc(db,"rooms",String(rid)), window.rooms[rid]);
+}
+async function saveExpenses() {
+  await setDoc(doc(db,"data","expenses"), {list: window.expenses});
+}
+async function saveCashSales() {
+  await setDoc(doc(db,"data","cashSales"), {list: window.cashSales});
+}
+async function saveHistory() {
+  await setDoc(doc(db,"data","history"), {list: window.history});
+}
+async function saveProducts() {
+  await setDoc(doc(db,"data","products"), {list: window.PRODUCTS});
 }
 
-function rGame(rid){const r=rooms[rid];if(!r.active)return 0;return Math.round(elapsedH(r.startTime)*r.price);}
-function rOrds(rid){return rooms[rid].orders.reduce((s,o)=>s+o.price*o.qty,0);}
-function rTotal(rid){return rGame(rid)+rOrds(rid);}
+// Real-time tinglash
+function listenAll() {
+  // Xonalar
+  ROOM_CONFIG.forEach(r => {
+    onSnapshot(doc(db,"rooms",String(r.id)), snap => {
+      if(snap.exists()) {
+        window.rooms[r.id] = snap.data();
+      }
+      if(document.getElementById("page-dashboard") && !document.getElementById("page-dashboard").classList.contains("hidden")) {
+        renderDashboard();
+      }
+      if(window.selRoom===r.id && !document.getElementById("page-room").classList.contains("hidden")) {
+        renderRoom();
+      }
+    });
+  });
 
-// ── NAVIGATSIYA ─────────────────────────────────────────────────────────────
-function goPage(p){
+  // Boshqa ma'lumotlar
+  onSnapshot(doc(db,"data","expenses"), snap => {
+    if(snap.exists()) window.expenses = snap.data().list || [];
+    updateReportStats();
+  });
+  onSnapshot(doc(db,"data","cashSales"), snap => {
+    if(snap.exists()) window.cashSales = snap.data().list || [];
+    updateReportStats();
+  });
+  onSnapshot(doc(db,"data","history"), snap => {
+    if(snap.exists()) window.history = snap.data().list || [];
+    updateReportStats();
+  });
+  onSnapshot(doc(db,"data","products"), snap => {
+    if(snap.exists()) window.PRODUCTS = snap.data().list || window.PRODUCTS;
+  });
+}
+
+function updateReportStats() {
+  const xona=window.history.reduce((s,h)=>s+h.total,0);
+  const naqd=window.cashSales.reduce((s,c)=>s+c.total,0);
+  const exp=window.expenses.reduce((s,e)=>s+e.amount,0);
+  if(document.getElementById("s-xona")) {
+    document.getElementById("s-xona").textContent=fmtS(xona);
+    document.getElementById("s-naqd").textContent=fmtS(naqd);
+    document.getElementById("s-exp").textContent=fmtS(exp);
+    document.getElementById("s-profit").textContent=fmtS(xona+naqd-exp);
+  }
+}
+
+// ── BOSHLASH ─────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    listenAll();
+    document.getElementById("loading").classList.add("hidden");
+    goPage("dashboard");
+  } catch(e) {
+    console.error(e);
+    document.getElementById("loading").classList.add("hidden");
+    goPage("dashboard");
+  }
+}
+
+// ── NAVIGATSIYA ──────────────────────────────────────────────────────────────
+window.goPage = p => {
   ["dashboard","room","kassa","report","settings"].forEach(id=>{
     document.getElementById("page-"+id).classList.add("hidden");
   });
   document.getElementById("page-"+p).classList.remove("hidden");
-  if(p==="dashboard")renderDashboard();
-  if(p==="room")renderRoom();
-  if(p==="kassa")renderKassa();
-  if(p==="report")renderReport();
-  if(p==="settings")renderSettings();
-}
+  if(p==="dashboard") renderDashboard();
+  if(p==="room") renderRoom();
+  if(p==="kassa") renderKassa();
+  if(p==="report") renderReport();
+  if(p==="settings") renderSettings();
+};
 
-// ── DASHBOARD ───────────────────────────────────────────────────────────────
-function renderDashboard(){
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+window.renderDashboard = () => {
   document.getElementById("dash-clock").textContent=timeNow();
-  const activeCount=ROOM_CONFIG.filter(r=>rooms[r.id].active).length;
+  const activeCount=ROOM_CONFIG.filter(r=>window.rooms[r.id]?.active).length;
   document.getElementById("dash-active").textContent=activeCount+" faol xona";
-  const xona=history.reduce((s,h)=>s+h.total,0);
-  const naqd=cashSales.reduce((s,c)=>s+c.total,0);
-  const exp=expenses.reduce((s,e)=>s+e.amount,0);
-  document.getElementById("s-xona").textContent=fmtS(xona);
-  document.getElementById("s-naqd").textContent=fmtS(naqd);
-  document.getElementById("s-exp").textContent=fmtS(exp);
-  document.getElementById("s-profit").textContent=fmtS(xona+naqd-exp);
-
+  updateReportStats();
   renderRoomGrid("rooms-floor1", ROOM_CONFIG.filter(r=>r.id<=25));
   renderRoomGrid("rooms-floor2", ROOM_CONFIG.filter(r=>r.id>25));
-}
+};
 
-function renderRoomGrid(elId, list){
+function renderRoomGrid(elId, list) {
   const el=document.getElementById(elId);
   el.innerHTML="";
   list.forEach(r=>{
-    const room=rooms[r.id];
+    const room=window.rooms[r.id]||{active:false};
     const active=room.active;
     const btn=document.createElement("button");
     btn.className="room-btn";
@@ -428,16 +525,16 @@ function renderRoomGrid(elId, list){
     btn.style.borderColor=active?"#6366f1":"#1e293b";
     btn.innerHTML=`<span class="room-num">${r.label}</span>`+
       (active?`<span class="room-time">${elapsed(room.startTime)}</span><span class="room-money">${fmtS(rTotal(r.id))}</span>`:`<span class="room-free">Bo'sh</span>`);
-    btn.onclick=()=>{selRoom=r.id;activeRoomCat=CATS[0];goPage("room");};
+    btn.onclick=()=>{window.selRoom=r.id;window.activeRoomCat=CATS[0];goPage("room");};
     el.appendChild(btn);
   });
 }
 
-// ── XONA ────────────────────────────────────────────────────────────────────
-function renderRoom(){
-  if(!selRoom)return;
-  const r=rooms[selRoom];
-  const cfg=ROOM_CONFIG.find(c=>c.id===selRoom);
+// ── XONA ─────────────────────────────────────────────────────────────────────
+window.renderRoom = () => {
+  if(!window.selRoom) return;
+  const r=window.rooms[window.selRoom]||{active:false,orders:[]};
+  const cfg=ROOM_CONFIG.find(c=>c.id===window.selRoom);
   document.getElementById("room-title").textContent="Xona "+cfg.label;
   document.getElementById("room-price-label").textContent=fmt(cfg.price)+"/soat";
   document.getElementById("room-clock").textContent=timeNow();
@@ -445,19 +542,19 @@ function renderRoom(){
   document.getElementById("room-open").style.display=r.active?"block":"none";
   if(r.active){
     document.getElementById("r-elapsed").textContent=elapsed(r.startTime);
-    document.getElementById("r-game").textContent=fmt(rGame(selRoom));
-    document.getElementById("r-ords").textContent=fmt(rOrds(selRoom));
-    document.getElementById("r-total").textContent=fmt(rTotal(selRoom));
+    document.getElementById("r-game").textContent=fmt(rGame(window.selRoom));
+    document.getElementById("r-ords").textContent=fmt(rOrds(window.selRoom));
+    document.getElementById("r-total").textContent=fmt(rTotal(window.selRoom));
     renderRoomOrders();
     renderRoomProducts();
   }
-}
+};
 
-function renderRoomOrders(){
-  const r=rooms[selRoom];
+function renderRoomOrders() {
+  const r=window.rooms[window.selRoom];
   const wrap=document.getElementById("room-order-list-wrap");
   const el=document.getElementById("room-order-list");
-  if(r.orders.length===0){wrap.style.display="none";return;}
+  if(!r.orders||r.orders.length===0){wrap.style.display="none";return;}
   wrap.style.display="block";
   el.innerHTML="";
   r.orders.forEach(o=>{
@@ -474,21 +571,21 @@ function renderRoomOrders(){
   });
 }
 
-function renderRoomProducts(){
+function renderRoomProducts() {
   const catEl=document.getElementById("room-cats");
   catEl.innerHTML="";
   CATS.forEach(c=>{
     const btn=document.createElement("button");
-    btn.className="cat-btn"+(activeRoomCat===c?" active":"");
+    btn.className="cat-btn"+(window.activeRoomCat===c?" active":"");
     btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{activeRoomCat=c;renderRoomProducts();};
+    btn.onclick=()=>{window.activeRoomCat=c;renderRoomProducts();};
     catEl.appendChild(btn);
   });
   const el=document.getElementById("room-prods");
   el.innerHTML="";
-  const r=rooms[selRoom];
-  PRODUCTS.filter(p=>p.cat===activeRoomCat).forEach(p=>{
-    const inO=r.orders.find(o=>o.id===p.id);
+  const r=window.rooms[window.selRoom];
+  window.PRODUCTS.filter(p=>p.cat===window.activeRoomCat).forEach(p=>{
+    const inO=(r.orders||[]).find(o=>o.id===p.id);
     const btn=document.createElement("button");
     btn.className="prod-card"+(inO?" selected":"");
     btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span>
@@ -500,85 +597,95 @@ function renderRoomProducts(){
   });
 }
 
-function addRoomOrder(prod){
-  const r=rooms[selRoom];
-  const ex=r.orders.find(o=>o.id===prod.id);
-  if(ex)r.orders=r.orders.map(o=>o.id===prod.id?{...o,qty:o.qty+1}:o);
-  else r.orders=[...r.orders,{...prod,qty:1}];
+window.addRoomOrder = async prod => {
+  const r=window.rooms[window.selRoom];
+  const orders=r.orders||[];
+  const ex=orders.find(o=>o.id===prod.id);
+  const newOrders=ex?orders.map(o=>o.id===prod.id?{...o,qty:o.qty+1}:o):[...orders,{...prod,qty:1}];
+  window.rooms[window.selRoom]={...r,orders:newOrders};
+  await saveRoom(window.selRoom);
   renderRoom();
-}
+};
 
-function chRoomQty(pid,d){
-  rooms[selRoom].orders=rooms[selRoom].orders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
+window.chRoomQty = async (pid,d) => {
+  const r=window.rooms[window.selRoom];
+  const orders=(r.orders||[]).map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
+  window.rooms[window.selRoom]={...r,orders};
+  await saveRoom(window.selRoom);
   renderRoom();
-}
+};
 
-function openRoom(){
-  const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);
-  rooms[selRoom]={active:true,startTime:new Date().toISOString(),orders:[],price:cfg.price};
+window.openRoom = async () => {
+  const cfg=ROOM_CONFIG.find(r=>r.id===window.selRoom);
+  window.rooms[window.selRoom]={active:true,startTime:new Date().toISOString(),orders:[],price:cfg.price};
+  await saveRoom(window.selRoom);
   notify("Xona "+cfg.label+" ochildi ✅");
   renderRoom();
-}
+};
 
-function showConfirm(){
+window.showConfirm = () => {
   document.getElementById("room-close-btn-wrap").style.display="none";
   document.getElementById("room-confirm").classList.remove("hidden");
-  document.getElementById("c-game").textContent=fmt(rGame(selRoom));
-  document.getElementById("c-ords").textContent=fmt(rOrds(selRoom));
-  document.getElementById("c-total").textContent=fmt(rTotal(selRoom));
-  document.getElementById("c-click-total").textContent=fmt(rTotal(selRoom));
+  document.getElementById("c-game").textContent=fmt(rGame(window.selRoom));
+  document.getElementById("c-ords").textContent=fmt(rOrds(window.selRoom));
+  document.getElementById("c-total").textContent=fmt(rTotal(window.selRoom));
+  document.getElementById("c-click-total").textContent=fmt(rTotal(window.selRoom));
   document.getElementById("cash-input").value="";
   document.getElementById("change-box").innerHTML="";
-}
+};
 
-function hideConfirm(){
+window.hideConfirm = () => {
   document.getElementById("room-close-btn-wrap").style.display="block";
   document.getElementById("room-confirm").classList.add("hidden");
-}
+};
 
-function calcChange(){
+window.calcChange = () => {
   const val=Number(document.getElementById("cash-input").value);
-  const total=rTotal(selRoom);
+  const total=rTotal(window.selRoom);
   const el=document.getElementById("change-box");
   if(!val){el.innerHTML="";return;}
-  if(val>=total)el.innerHTML=`<div class="change-green">Qaytim: <strong>${fmt(val-total)}</strong></div>`;
+  if(val>=total) el.innerHTML=`<div class="change-green">Qaytim: <strong>${fmt(val-total)}</strong></div>`;
   else el.innerHTML=`<div class="change-red">Yetishmaydi: <strong>${fmt(total-val)}</strong></div>`;
-}
+};
 
-function closeRoom(isClick){
-  const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);
-  const r=rooms[selRoom];
-  const total=rTotal(selRoom);
+window.closeRoom = async isClick => {
+  const cfg=ROOM_CONFIG.find(r=>r.id===window.selRoom);
+  const r=window.rooms[window.selRoom];
+  const total=rTotal(window.selRoom);
   const cash=Number(document.getElementById("cash-input").value)||total;
-  const rec={rid:selRoom,label:cfg.label,date:dateStr(),startTime:r.startTime,
-    orders:[...r.orders],gameCharge:rGame(selRoom),orderSum:rOrds(selRoom),total,cash,isClick};
-  history.unshift(rec);
+  const rec={rid:window.selRoom,label:cfg.label,date:dateStr(),startTime:r.startTime,
+    orders:[...(r.orders||[])],gameCharge:rGame(window.selRoom),orderSum:rOrds(window.selRoom),total,cash,isClick};
+  window.history.unshift(rec);
+  await saveHistory();
   if(isClick){
-    expenses.unshift({type:"click",name:"Xona "+cfg.label+" — Click orqali to'landi",amount:total,date:dateStr()});
+    window.expenses.unshift({type:"click",name:"Xona "+cfg.label+" — Click orqali to'landi",amount:total,date:dateStr()});
+    await saveExpenses();
     notify("Click to'lov xarajatga yozildi 💳","#7c3aed");
   } else {
     notify("Xona "+cfg.label+" yopildi 💰 "+fmt(total));
   }
-  rooms[selRoom]={active:false,startTime:null,orders:[],price:cfg.price};
+  const cfg2=ROOM_CONFIG.find(r=>r.id===window.selRoom);
+  window.rooms[window.selRoom]={active:false,startTime:null,orders:[],price:cfg2.price};
+  await saveRoom(window.selRoom);
   goPage("dashboard");
-}
+};
 
-// ── KASSA ────────────────────────────────────────────────────────────────────
-function renderKassa(){
+// ── KASSA ─────────────────────────────────────────────────────────────────────
+window.renderKassa = () => {
   document.getElementById("kassa-clock").textContent=timeNow();
   const catEl=document.getElementById("kassa-cats");
   catEl.innerHTML="";
   CATS.forEach(c=>{
     const btn=document.createElement("button");
-    btn.className="cat-btn"+(kassaCat===c?" active-green":"");
+    btn.className="cat-btn"+(window.kassaCat===c?" active-green":"");
     btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{kassaCat=c;renderKassa();};
+    btn.onclick=()=>{window.kassaCat=c;renderKassa();};
     catEl.appendChild(btn);
   });
   const el=document.getElementById("kassa-prods");
   el.innerHTML="";
-  PRODUCTS.filter(p=>p.cat===kassaCat).forEach(p=>{
-    const inO=kassaOrders.find(o=>o.id===p.id);
+  window.PRODUCTS.filter(p=>p.cat===window.kassaCat).forEach(p=>{
+    const inO=window.kassaOrders.find(o=>o.id===p.id);
     const btn=document.createElement("button");
     btn.className="prod-card"+(inO?" selected-green":"");
     btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span>
@@ -586,20 +693,20 @@ function renderKassa(){
       <span class="prod-price">${fmt(p.price)}</span>
       ${inO?`<span class="prod-badge green">${inO.qty}</span>`:""}`;
     btn.onclick=()=>{
-      const ex=kassaOrders.find(o=>o.id===p.id);
-      if(ex)kassaOrders=kassaOrders.map(o=>o.id===p.id?{...o,qty:o.qty+1}:o);
-      else kassaOrders=[...kassaOrders,{...p,qty:1}];
+      const ex=window.kassaOrders.find(o=>o.id===p.id);
+      if(ex) window.kassaOrders=window.kassaOrders.map(o=>o.id===p.id?{...o,qty:o.qty+1}:o);
+      else window.kassaOrders=[...window.kassaOrders,{...p,qty:1}];
       renderKassa();
     };
     el.appendChild(btn);
   });
-  const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
+  const total=window.kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
   const wrap=document.getElementById("kassa-order-wrap");
-  if(kassaOrders.length===0){wrap.style.display="none";return;}
+  if(window.kassaOrders.length===0){wrap.style.display="none";return;}
   wrap.style.display="block";
   const listEl=document.getElementById("kassa-order-list");
   listEl.innerHTML="";
-  kassaOrders.forEach(o=>{
+  window.kassaOrders.forEach(o=>{
     const div=document.createElement("div");
     div.className="order-row";
     div.innerHTML=`<span class="ord-name">${o.emoji} ${o.name}</span>
@@ -612,54 +719,57 @@ function renderKassa(){
     listEl.appendChild(div);
   });
   document.getElementById("kassa-total").textContent=fmt(total);
-}
+};
 
-function chKassaQty(pid,d){
-  kassaOrders=kassaOrders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
+window.chKassaQty = (pid,d) => {
+  window.kassaOrders=window.kassaOrders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
   renderKassa();
-}
+};
 
-function confirmCashSale(){
-  if(kassaOrders.length===0)return;
-  const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
-  cashSales.unshift({orders:[...kassaOrders],total,date:dateStr()});
-  kassaOrders=[];
+window.confirmCashSale = async () => {
+  if(window.kassaOrders.length===0) return;
+  const total=window.kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
+  window.cashSales.unshift({orders:[...window.kassaOrders],total,date:dateStr()});
+  await saveCashSales();
+  window.kassaOrders=[];
   notify("Naqd sotuv: "+fmt(total)+" 💵");
   renderKassa();
-}
+};
 
-function addClickExpense(){
+window.addClickExpense = async () => {
   const val=Number(document.getElementById("click-exp-input").value);
-  if(!val)return;
-  expenses.unshift({type:"click",name:"Click orqali to'landi",amount:val,date:dateStr()});
+  if(!val) return;
+  window.expenses.unshift({type:"click",name:"Click orqali to'landi",amount:val,date:dateStr()});
+  await saveExpenses();
   document.getElementById("click-exp-input").value="";
   notify("Click xarajat qo'shildi 💳","#7c3aed");
-}
+};
 
-function setExpType(t){
-  expType=t;
+window.setExpType = t => {
+  window.expType=t;
   ["bozorlik","kassadan","boshqa"].forEach(x=>{
     document.getElementById("etype-"+x).classList.toggle("active",x===t);
   });
-}
+};
 
-function addExpense(){
+window.addExpense = async () => {
   const name=document.getElementById("exp-name").value.trim();
   const amount=Number(document.getElementById("exp-amount").value);
-  if(!name||!amount)return;
-  expenses.unshift({type:expType,name,amount,date:dateStr()});
+  if(!name||!amount) return;
+  window.expenses.unshift({type:window.expType,name,amount,date:dateStr()});
+  await saveExpenses();
   document.getElementById("exp-name").value="";
   document.getElementById("exp-amount").value="";
   notify("Xarajat qo'shildi","#f59e0b");
-}
+};
 
 // ── HISOBOT ──────────────────────────────────────────────────────────────────
-function renderReport(){
+window.renderReport = () => {
   document.getElementById("report-clock").textContent=timeNow();
-  const xona=history.reduce((s,h)=>s+h.total,0);
-  const naqd=cashSales.reduce((s,c)=>s+c.total,0);
-  const clickExp=expenses.filter(e=>e.type==="click").reduce((s,e)=>s+e.amount,0);
-  const otherExp=expenses.filter(e=>e.type!=="click").reduce((s,e)=>s+e.amount,0);
+  const xona=window.history.reduce((s,h)=>s+h.total,0);
+  const naqd=window.cashSales.reduce((s,c)=>s+c.total,0);
+  const clickExp=window.expenses.filter(e=>e.type==="click").reduce((s,e)=>s+e.amount,0);
+  const otherExp=window.expenses.filter(e=>e.type!=="click").reduce((s,e)=>s+e.amount,0);
   const totalExp=clickExp+otherExp;
   document.getElementById("r-xona").textContent=fmtS(xona);
   document.getElementById("r-naqd").textContent=fmtS(naqd);
@@ -669,33 +779,27 @@ function renderReport(){
   document.getElementById("r-other").textContent=fmt(otherExp);
   document.getElementById("r-exp-total").textContent=fmt(totalExp);
 
-  const hasData=expenses.length>0||cashSales.length>0||history.length>0;
+  const hasData=window.expenses.length>0||window.cashSales.length>0||window.history.length>0;
   document.getElementById("report-empty").style.display=hasData?"none":"flex";
 
-  // Xarajatlar
   const expWrap=document.getElementById("exp-list-wrap");
-  if(expenses.length>0){
+  if(window.expenses.length>0){
     expWrap.style.display="block";
-    const el=document.getElementById("exp-list");
-    el.innerHTML="";
-    expenses.forEach(e=>{
+    const el=document.getElementById("exp-list");el.innerHTML="";
+    window.expenses.forEach(e=>{
       const icon=e.type==="click"?"💳":e.type==="bozorlik"?"🛍":e.type==="kassadan"?"💸":"📌";
-      const div=document.createElement("div");
-      div.className="order-row";
+      const div=document.createElement("div");div.className="order-row";
       div.innerHTML=`<div><div style="font-size:13px">${icon} ${e.name}</div><div style="font-size:11px;color:#475569">${e.date}</div></div><span style="color:#ef4444;font-weight:700">${fmt(e.amount)}</span>`;
       el.appendChild(div);
     });
   } else expWrap.style.display="none";
 
-  // Naqd sotuvlar
   const csWrap=document.getElementById("cash-sales-wrap");
-  if(cashSales.length>0){
+  if(window.cashSales.length>0){
     csWrap.style.display="block";
-    const el=document.getElementById("cash-sales-list");
-    el.innerHTML="";
-    cashSales.forEach(c=>{
-      const div=document.createElement("div");
-      div.className="hist-card";
+    const el=document.getElementById("cash-sales-list");el.innerHTML="";
+    window.cashSales.forEach(c=>{
+      const div=document.createElement("div");div.className="hist-card";
       div.innerHTML=`<div class="hist-head"><span>🛒 Naqd sotuv</span><span style="color:#22c55e;font-weight:700">${fmt(c.total)}</span></div>
         <div class="hist-meta">${c.date}</div>
         <div class="hist-orders">${c.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`;
@@ -703,42 +807,35 @@ function renderReport(){
     });
   } else csWrap.style.display="none";
 
-  // Sessiyalar
   const hWrap=document.getElementById("history-wrap");
-  if(history.length>0){
+  if(window.history.length>0){
     hWrap.style.display="block";
-    const el=document.getElementById("history-list");
-    el.innerHTML="";
-    history.forEach(h=>{
-      const div=document.createElement("div");
-      div.className="hist-card";
+    const el=document.getElementById("history-list");el.innerHTML="";
+    window.history.forEach(h=>{
+      const div=document.createElement("div");div.className="hist-card";
       div.innerHTML=`<div class="hist-head"><span>🎮 Xona ${h.label}</span><span style="color:#22c55e;font-weight:700">${fmt(h.total)}</span></div>
         <div class="hist-meta">${h.date}</div>
-        <div class="hist-row"><span>🎮 O'yin: ${fmt(h.gameCharge)}</span><span>🛒 Mahsulot: ${fmt(h.orderSum)}</span><span>${h.isClick?"💳 Click":"💵 Naqd"}</span></div>
-        ${h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;
+        <div class="hist-row"><span>🎮 ${fmt(h.gameCharge)}</span><span>🛒 ${fmt(h.orderSum)}</span><span>${h.isClick?"💳":"💵"}</span></div>
+        ${h.orders&&h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;
       el.appendChild(div);
     });
   } else hWrap.style.display="none";
-}
+};
 
-// ── SOZLAMALAR ───────────────────────────────────────────────────────────────
-function renderSettings(){
-  // Yangi mahsulot kategoriya tanlash
+// ── SOZLAMALAR ────────────────────────────────────────────────────────────────
+window.renderSettings = () => {
   const catRow=document.getElementById("new-prod-cat-row");
   catRow.innerHTML="";
   CATS.forEach(c=>{
     const btn=document.createElement("button");
-    btn.className="cat-btn"+(newProdCat===c?" active":"");
+    btn.className="cat-btn"+(window.newProdCat===c?" active":"");
     btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{newProdCat=c;renderSettings();};
+    btn.onclick=()=>{window.newProdCat=c;renderSettings();};
     catRow.appendChild(btn);
   });
-  // Mahsulotlar ro'yxati
-  const el=document.getElementById("prod-list-settings");
-  el.innerHTML="";
-  PRODUCTS.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="order-row";
+  const el=document.getElementById("prod-list-settings");el.innerHTML="";
+  window.PRODUCTS.forEach(p=>{
+    const div=document.createElement("div");div.className="order-row";
     div.innerHTML=`<span>${p.emoji} ${p.name} <span style="color:#64748b;font-size:11px">(${p.cat})</span></span>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="color:#818cf8">${fmt(p.price)}</span>
@@ -746,45 +843,44 @@ function renderSettings(){
       </div>`;
     el.appendChild(div);
   });
-}
+};
 
-function addProduct(){
+window.addProduct = async () => {
   const name=document.getElementById("new-prod-name").value.trim();
   const price=Number(document.getElementById("new-prod-price").value);
-  if(!name||!price)return;
+  if(!name||!price) return;
   const emojis={Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
-  const newId=Math.max(...PRODUCTS.map(p=>p.id))+1;
-  PRODUCTS.push({id:newId,name,price,cat:newProdCat,emoji:emojis[newProdCat]||"📦"});
+  const newId=Math.max(...window.PRODUCTS.map(p=>p.id))+1;
+  window.PRODUCTS.push({id:newId,name,price,cat:window.newProdCat,emoji:emojis[window.newProdCat]||"📦"});
+  await saveProducts();
   document.getElementById("new-prod-name").value="";
   document.getElementById("new-prod-price").value="";
   notify(name+" qo'shildi ✅");
   renderSettings();
-}
+};
 
-function removeProduct(id){
-  PRODUCTS=PRODUCTS.filter(p=>p.id!==id);
+window.removeProduct = async id => {
+  window.PRODUCTS=window.PRODUCTS.filter(p=>p.id!==id);
+  await saveProducts();
   notify("Mahsulot o'chirildi","#ef4444");
   renderSettings();
-}
+};
 
-function clearDay(){
-  if(!confirm("Barcha kun ma'lumotlari o'chiriladi!"))return;
-  history=[];expenses=[];cashSales=[];kassaOrders=[];
+window.clearDay = async () => {
+  if(!confirm("Barcha kun ma'lumotlari o'chiriladi!")) return;
+  window.history=[];window.expenses=[];window.cashSales=[];window.kassaOrders=[];
+  await saveHistory();await saveExpenses();await saveCashSales();
   notify("Kun tozalandi","#ef4444");
   renderSettings();
-}
+};
 
-// ── AVTOMATIK YANGILANISH ────────────────────────────────────────────────────
+// Avtomatik yangilash
 setInterval(()=>{
-  const cur=document.querySelector(".page:not(.hidden)");
-  if(!cur)return;
-  const id=cur.id.replace("page-","");
-  if(id==="dashboard")renderDashboard();
-  if(id==="room")renderRoom();
+  if(!document.getElementById("page-dashboard").classList.contains("hidden")) renderDashboard();
+  if(!document.getElementById("page-room").classList.contains("hidden")) renderRoom();
 },30000);
 
-// ── BOSHLASH ─────────────────────────────────────────────────────────────────
-goPage("dashboard");
+init();
 </script>
 </body>
 </html>
