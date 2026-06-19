@@ -9,15 +9,18 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#0a0f1e;color:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
-button{cursor:pointer;font-family:inherit}input{font-family:inherit}
+button{cursor:pointer;font-family:inherit}input,select{font-family:inherit}
 .page{padding:16px 12px 90px;min-height:100vh}
 .hidden{display:none!important}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #1e293b}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1e293b}
 .logo{font-size:17px;font-weight:800;color:#c7d2fe}
 .logo-sub{font-size:10px;color:#475569;margin-top:2px}
 .clock{font-size:12px;color:#64748b}
 .active-tag{background:#16a34a22;color:#22c55e;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
 .notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 8px 32px #0009;white-space:nowrap}
+.branch-switch{display:flex;gap:8px;margin-bottom:14px}
+.branch-btn{flex:1;border:2px solid #334155;border-radius:12px;padding:10px 0;color:#94a3b8;font-size:13px;font-weight:700;background:#111827}
+.branch-btn.active{border-color:#6366f1;background:#1e3a5f;color:#fff}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
 .stat-card{background:#111827;border-radius:14px;padding:12px 10px;border-left:3px solid;display:flex;flex-direction:column;gap:2px}
 .stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
@@ -71,7 +74,7 @@ button{cursor:pointer;font-family:inherit}input{font-family:inherit}
 .btn-purple{background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;width:100%;margin-top:6px}
 .btn-gray{background:#334155;border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;flex:1}
 .btn-cg{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;flex:2}
-input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;margin-bottom:8px;outline:none}
+input,select{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;margin-bottom:8px;outline:none}
 .big-open{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:14px;color:#fff;padding:16px 0;font-size:16px;font-weight:800;width:100%;margin-top:16px}
 .centered{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:60px;gap:10px}
 .empty-text{font-size:18px;color:#475569;font-weight:600}
@@ -88,6 +91,9 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
 .nav-icon{font-size:22px}
 .exp-type-btn{border:1px solid #334155;border-radius:20px;padding:5px 12px;color:#fff;font-size:11px;font-weight:600;background:#1e293b;margin-right:6px;margin-bottom:6px}
 .exp-type-btn.active{background:#dc2626;border-color:#ef4444}
+.price-edit-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1e293b;font-size:13px}
+.price-input{width:90px;margin:0;padding:7px 8px;font-size:13px;text-align:right}
+.tab-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -96,12 +102,18 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page hidden">
   <div class="header">
-    <div><div class="logo">🎮 PlayStation</div><div class="logo-sub">Boshqaruv Tizimi</div></div>
+    <div><div class="logo">🎮 PlayStation</div><div class="logo-sub" id="dash-branch-label">Chelsea 1</div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="clock" id="dash-clock"></div>
       <div class="active-tag" id="dash-active">0 faol xona</div>
     </div>
   </div>
+
+  <div class="branch-switch">
+    <button class="branch-btn" id="branch-btn-chelsea1" onclick="setBranch('chelsea1')">Chelsea 1</button>
+    <button class="branch-btn" id="branch-btn-chelsea2" onclick="setBranch('chelsea2')">Chelsea 2</button>
+  </div>
+
   <div class="grid4">
     <div class="stat-card" style="border-color:#6366f1"><div class="stat-label">Xona daromad</div><div class="stat-val" style="color:#6366f1" id="s-xona">0</div><div class="stat-sub">so'm</div></div>
     <div class="stat-card" style="border-color:#22c55e"><div class="stat-label">Naqd sotuv</div><div class="stat-val" style="color:#22c55e" id="s-naqd">0</div><div class="stat-sub">so'm</div></div>
@@ -112,10 +124,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
     <button class="quick-btn" style="background:#1e3a5f;border-color:#6366f1" onclick="goPage('kassa')">💵 Naqd Sotuv</button>
     <button class="quick-btn" style="background:#2d1b4e;border-color:#7c3aed" onclick="goPage('report')">📊 Hisobot</button>
   </div>
-  <div class="floor-label">🏠 1-chi qavat — 1–25-xona</div>
-  <div class="room-grid" id="rooms-floor1"></div>
-  <div class="floor-label">🏢 2-chi qavat — 101–107-xona</div>
-  <div class="room-grid" id="rooms-floor2"></div>
+  <div id="floors-container"></div>
   <div class="bottom-nav">
     <button class="nav-btn active" onclick="goPage('dashboard')"><span class="nav-icon">🏠</span>Bosh</button>
     <button class="nav-btn" onclick="goPage('kassa')"><span class="nav-icon">💵</span>Kassa</button>
@@ -266,13 +275,16 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
 <!-- SOZLAMALAR -->
 <div id="page-settings" class="page hidden">
   <div class="header"><div class="logo">⚙️ Sozlamalar</div></div>
+
   <div class="section">
-    <div class="sec-title">🏠 Xona Narxlari</div>
-    <div class="order-row"><span>Xona 1–7</span><span style="color:#a5b4fc">22 000 so'm/soat</span></div>
-    <div class="order-row"><span>Xona 8–10</span><span style="color:#a5b4fc">28 000 so'm/soat</span></div>
-    <div class="order-row"><span>Xona 11–25</span><span style="color:#a5b4fc">22 000 so'm/soat</span></div>
-    <div class="order-row"><span>Xona 101–107</span><span style="color:#a5b4fc">28 000 so'm/soat</span></div>
+    <div class="sec-title">🏠 Xona Narxlari (tahrirlash mumkin)</div>
+    <div class="tab-row">
+      <button class="cat-btn active" id="price-tab-chelsea1" onclick="setPriceTab('chelsea1')">Chelsea 1</button>
+      <button class="cat-btn" id="price-tab-chelsea2" onclick="setPriceTab('chelsea2')">Chelsea 2</button>
+    </div>
+    <div id="price-edit-list"></div>
   </div>
+
   <div class="section">
     <div class="sec-title">🛒 Mahsulot Qo'shish</div>
     <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -307,15 +319,44 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// XONALAR
-const ROOM_CONFIG = [
-  ...Array.from({length:7},(_,i)=>({id:i+1,label:`${i+1}`,price:22000})),
-  {id:8,label:"8",price:28000},{id:9,label:"9",price:28000},{id:10,label:"10",price:28000},
-  ...Array.from({length:15},(_,i)=>({id:i+11,label:`${i+11}`,price:22000})),
-  ...Array.from({length:7},(_,i)=>({id:i+26,label:`10${i+1}`,price:28000})),
-];
+// ── FILIALLAR VA XONALAR ──────────────────────────────────────────────────
+const BRANCHES = {
+  chelsea1: {
+    label: "Chelsea 1",
+    floors: [
+      { label: "2-chi qavat", rooms: ["11","22","33","44","55","66","77","88","99"], defaultPrice: 22000 },
+      { label: "3-chi qavat", rooms: ["01","1","2","3","4","5","6","7","8","9","10"], defaultPrice: 22000 },
+      { label: "4-chi qavat", rooms: ["101","102","103","104","105","106","107"], defaultPrice: 22000 },
+    ]
+  },
+  chelsea2: {
+    label: "Chelsea 2",
+    floors: [
+      { label: "Filial", rooms: ["1","2","3","4","5","6","7","8","9","10"], defaultPrice: 22000 },
+    ]
+  }
+};
+// Xona 8,9,10 (Chelsea1 3-qavat) uchun maxsus narx
+const SPECIAL_PRICES = { "chelsea1:3-chi qavat:8": 28000, "chelsea1:3-chi qavat:9": 28000, "chelsea1:3-chi qavat:10": 28000 };
 
-// MAHSULOTLAR
+// Har bir xona uchun unikal ID generatsiya: branch_floorIdx_roomLabel
+function buildRoomList() {
+  const list = [];
+  Object.keys(BRANCHES).forEach(branchKey => {
+    BRANCHES[branchKey].floors.forEach((floor, fIdx) => {
+      floor.rooms.forEach(roomLabel => {
+        const id = `${branchKey}_${fIdx}_${roomLabel}`;
+        const specialKey = `${branchKey}:${floor.label}:${roomLabel}`;
+        const price = SPECIAL_PRICES[specialKey] || floor.defaultPrice;
+        list.push({ id, branch: branchKey, floorIdx: fIdx, floorLabel: floor.label, label: roomLabel, price });
+      });
+    });
+  });
+  return list;
+}
+let ROOM_CONFIG = buildRoomList();
+
+// ── MAHSULOTLAR ──────────────────────────────────────────────────────────
 let PRODUCTS = [
   {id:1,name:"Coca-Cola",price:17000,cat:"Ichimlik",emoji:"🥤"},
   {id:2,name:"Pepsi",price:18000,cat:"Ichimlik",emoji:"🥤"},
@@ -353,13 +394,15 @@ let PRODUCTS = [
 const CATS=["Ichimlik","Energetik","Snak","Qurt","Fast Food"];
 const CE={Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
 
-// STATE
+// ── STATE ────────────────────────────────────────────────────────────────
 let rooms={};
 ROOM_CONFIG.forEach(r=>{rooms[r.id]={active:false,startTime:null,orders:[],price:r.price};});
 let expenses=[],cashSales=[],history=[];
 let selRoom=null,activeRoomCat=CATS[0],kassaCat=CATS[0],kassaOrders=[],expType="bozorlik",newProdCat=CATS[0];
+let currentBranch="chelsea1";
+let priceTab="chelsea1";
 
-// HELPERS
+// ── HELPERS ──────────────────────────────────────────────────────────────
 const fmt=n=>Number(n).toLocaleString("uz-UZ")+" so'm";
 const fmtS=n=>{n=Number(n);if(n>=1000000)return(n/1000000).toFixed(1)+"mln";if(n>=1000)return(n/1000).toFixed(0)+"k";return String(n);};
 const elapsed=iso=>{const d=Date.now()-new Date(iso).getTime(),h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}s ${m}d`:`${m}d`;};
@@ -378,11 +421,14 @@ const rGame=rid=>{const r=rooms[rid];if(!r||!r.active)return 0;return Math.round
 const rOrds=rid=>(rooms[rid]?.orders||[]).reduce((s,o)=>s+o.price*o.qty,0);
 const rTotal=rid=>rGame(rid)+rOrds(rid);
 
-// FIREBASE SAVE
+// ── FIREBASE SAVE ────────────────────────────────────────────────────────
 async function saveRoom(rid){try{await db.collection("rooms").doc(String(rid)).set(rooms[rid]);}catch(e){console.log(e);}}
 async function saveData(key,val){try{await db.collection("data").doc(key).set({list:val});}catch(e){console.log(e);}}
+async function saveRoomPrices(val){try{await db.collection("data").doc("roomPrices").set({map:val});}catch(e){console.log(e);}}
 
-// LISTEN
+let customPrices = {}; // { roomId: price }
+
+// ── LISTEN ───────────────────────────────────────────────────────────────
 function listenAll(){
   ROOM_CONFIG.forEach(r=>{
     db.collection("rooms").doc(String(r.id)).onSnapshot(snap=>{
@@ -395,25 +441,47 @@ function listenAll(){
   db.collection("data").doc("cashSales").onSnapshot(snap=>{if(snap.exists)cashSales=snap.data().list||[];updateStats();});
   db.collection("data").doc("history").onSnapshot(snap=>{if(snap.exists)history=snap.data().list||[];updateStats();});
   db.collection("data").doc("products").onSnapshot(snap=>{if(snap.exists)PRODUCTS=snap.data().list||PRODUCTS;});
+  db.collection("data").doc("roomPrices").onSnapshot(snap=>{
+    if(snap.exists){
+      customPrices=snap.data().map||{};
+      ROOM_CONFIG.forEach(r=>{
+        if(customPrices[r.id]!==undefined){
+          r.price=customPrices[r.id];
+          if(rooms[r.id])rooms[r.id].price=customPrices[r.id];
+        }
+      });
+      renderDashboard();
+      if(document.getElementById("page-settings")&&!document.getElementById("page-settings").classList.contains("hidden"))renderPriceEdit();
+    }
+  });
 }
 
 function updateStats(){
-  const xona=history.reduce((s,h)=>s+h.total,0);
-  const naqd=cashSales.reduce((s,c)=>s+c.total,0);
-  const exp=expenses.reduce((s,e)=>s+e.amount,0);
+  const xona=history.filter(h=>h.branch===currentBranch).reduce((s,h)=>s+h.total,0);
+  const naqd=cashSales.filter(c=>c.branch===currentBranch).reduce((s,c)=>s+c.total,0);
+  const exp=expenses.filter(e=>e.branch===currentBranch).reduce((s,e)=>s+e.amount,0);
   ["s-xona","r-xona"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(xona);});
   ["s-naqd","r-naqd"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(naqd);});
   ["s-exp"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(exp);});
   ["s-profit","r-profit"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(xona+naqd-exp);});
   const rki=document.getElementById("r-kirim");if(rki)rki.textContent=fmtS(xona+naqd);
-  const clickE=expenses.filter(e=>e.type==="click").reduce((s,e)=>s+e.amount,0);
-  const otherE=expenses.filter(e=>e.type!=="click").reduce((s,e)=>s+e.amount,0);
+  const clickE=expenses.filter(e=>e.branch===currentBranch&&e.type==="click").reduce((s,e)=>s+e.amount,0);
+  const otherE=expenses.filter(e=>e.branch===currentBranch&&e.type!=="click").reduce((s,e)=>s+e.amount,0);
   const rclk=document.getElementById("r-click");if(rclk)rclk.textContent=fmt(clickE);
   const roth=document.getElementById("r-other");if(roth)roth.textContent=fmt(otherE);
   const rext=document.getElementById("r-exp-total");if(rext)rext.textContent=fmt(clickE+otherE);
 }
 
-// NAV
+// ── BRANCH SWITCH ────────────────────────────────────────────────────────
+function setBranch(b){
+  currentBranch=b;
+  document.getElementById("branch-btn-chelsea1").classList.toggle("active",b==="chelsea1");
+  document.getElementById("branch-btn-chelsea2").classList.toggle("active",b==="chelsea2");
+  document.getElementById("dash-branch-label").textContent=BRANCHES[b].label;
+  renderDashboard();
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────────
 function goPage(p){
   ["dashboard","room","kassa","report","settings"].forEach(id=>document.getElementById("page-"+id).classList.add("hidden"));
   document.getElementById("page-"+p).classList.remove("hidden");
@@ -424,37 +492,46 @@ function goPage(p){
   if(p==="settings")renderSettings();
 }
 
-// DASHBOARD
+// ── DASHBOARD ────────────────────────────────────────────────────────────
 function renderDashboard(){
   document.getElementById("dash-clock").textContent=timeNow();
-  const ac=ROOM_CONFIG.filter(r=>rooms[r.id]?.active).length;
+  const branchRooms=ROOM_CONFIG.filter(r=>r.branch===currentBranch);
+  const ac=branchRooms.filter(r=>rooms[r.id]?.active).length;
   document.getElementById("dash-active").textContent=ac+" faol xona";
   updateStats();
-  renderRoomGrid("rooms-floor1",ROOM_CONFIG.filter(r=>r.id<=25));
-  renderRoomGrid("rooms-floor2",ROOM_CONFIG.filter(r=>r.id>25));
-}
 
-function renderRoomGrid(elId,list){
-  const el=document.getElementById(elId);el.innerHTML="";
-  list.forEach(r=>{
-    const room=rooms[r.id]||{active:false};
-    const a=room.active;
-    const btn=document.createElement("button");
-    btn.className="room-btn";
-    btn.style.background=a?"#1e3a5f":"#111827";
-    btn.style.borderColor=a?"#6366f1":"#1e293b";
-    btn.innerHTML=`<span class="room-num">${r.label}</span>`+(a?`<span class="room-time">${elapsed(room.startTime)}</span><span class="room-money">${fmtS(rTotal(r.id))}</span>`:`<span class="room-free">Bo'sh</span>`);
-    btn.onclick=()=>{selRoom=r.id;activeRoomCat=CATS[0];goPage("room");};
-    el.appendChild(btn);
+  const container=document.getElementById("floors-container");
+  container.innerHTML="";
+  const floors=BRANCHES[currentBranch].floors;
+  floors.forEach((floor,fIdx)=>{
+    const label=document.createElement("div");
+    label.className="floor-label";
+    label.textContent="🏠 "+floor.label+" — "+floor.rooms.length+" xona";
+    container.appendChild(label);
+    const grid=document.createElement("div");
+    grid.className="room-grid";
+    const floorRooms=branchRooms.filter(r=>r.floorIdx===fIdx);
+    floorRooms.forEach(r=>{
+      const room=rooms[r.id]||{active:false};
+      const a=room.active;
+      const btn=document.createElement("button");
+      btn.className="room-btn";
+      btn.style.background=a?"#1e3a5f":"#111827";
+      btn.style.borderColor=a?"#6366f1":"#1e293b";
+      btn.innerHTML=`<span class="room-num">${r.label}</span>`+(a?`<span class="room-time">${elapsed(room.startTime)}</span><span class="room-money">${fmtS(rTotal(r.id))}</span>`:`<span class="room-free">Bo'sh</span>`);
+      btn.onclick=()=>{selRoom=r.id;activeRoomCat=CATS[0];goPage("room");};
+      grid.appendChild(btn);
+    });
+    container.appendChild(grid);
   });
 }
 
-// XONA
+// ── XONA ─────────────────────────────────────────────────────────────────
 function renderRoom(){
   if(!selRoom)return;
   const r=rooms[selRoom]||{active:false,orders:[]};
   const cfg=ROOM_CONFIG.find(c=>c.id===selRoom);
-  document.getElementById("room-title").textContent="Xona "+cfg.label;
+  document.getElementById("room-title").textContent="Xona "+cfg.label+" ("+BRANCHES[cfg.branch].label+")";
   document.getElementById("room-price-label").textContent=fmt(cfg.price)+"/soat";
   document.getElementById("room-clock").textContent=timeNow();
   document.getElementById("room-closed").style.display=r.active?"none":"block";
@@ -537,15 +614,15 @@ function calcChange(){
 async function closeRoom(isClick){
   const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);const r=rooms[selRoom];const total=rTotal(selRoom);
   const cash=Number(document.getElementById("cash-input").value)||total;
-  const rec={rid:selRoom,label:cfg.label,date:dateStr(),startTime:r.startTime,orders:[...(r.orders||[])],gameCharge:rGame(selRoom),orderSum:rOrds(selRoom),total,cash,isClick};
+  const rec={rid:selRoom,branch:cfg.branch,label:cfg.label,floorLabel:cfg.floorLabel,date:dateStr(),startTime:r.startTime,orders:[...(r.orders||[])],gameCharge:rGame(selRoom),orderSum:rOrds(selRoom),total,cash,isClick};
   history.unshift(rec);await saveData("history",history);
-  if(isClick){expenses.unshift({type:"click",name:"Xona "+cfg.label+" — Click",amount:total,date:dateStr()});await saveData("expenses",expenses);notify("Click to'lov yozildi 💳","#7c3aed");}
+  if(isClick){expenses.unshift({type:"click",branch:cfg.branch,name:"Xona "+cfg.label+" — Click",amount:total,date:dateStr()});await saveData("expenses",expenses);notify("Click to'lov yozildi 💳","#7c3aed");}
   else notify("Xona "+cfg.label+" yopildi 💰 "+fmt(total));
   rooms[selRoom]={active:false,startTime:null,orders:[],price:cfg.price};
   await saveRoom(selRoom);goPage("dashboard");
 }
 
-// KASSA
+// ── KASSA ────────────────────────────────────────────────────────────────
 function renderKassa(){
   document.getElementById("kassa-clock").textContent=timeNow();
   const catEl=document.getElementById("kassa-cats");catEl.innerHTML="";
@@ -579,13 +656,13 @@ function chKassaQty(pid,d){kassaOrders=kassaOrders.map(o=>o.id===pid?{...o,qty:o
 async function confirmCashSale(){
   if(kassaOrders.length===0)return;
   const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
-  cashSales.unshift({orders:[...kassaOrders],total,date:dateStr()});
+  cashSales.unshift({orders:[...kassaOrders],total,date:dateStr(),branch:currentBranch});
   await saveData("cashSales",cashSales);kassaOrders=[];notify("Naqd sotuv: "+fmt(total)+" 💵");renderKassa();
 }
 
 async function addClickExpense(){
   const val=Number(document.getElementById("click-exp-input").value);if(!val)return;
-  expenses.unshift({type:"click",name:"Click orqali to'landi",amount:val,date:dateStr()});
+  expenses.unshift({type:"click",branch:currentBranch,name:"Click orqali to'landi",amount:val,date:dateStr()});
   await saveData("expenses",expenses);document.getElementById("click-exp-input").value="";notify("Click xarajat qo'shildi 💳","#7c3aed");
 }
 
@@ -596,35 +673,84 @@ function setExpType(t){
 async function addExpense(){
   const name=document.getElementById("exp-name").value.trim();const amount=Number(document.getElementById("exp-amount").value);
   if(!name||!amount)return;
-  expenses.unshift({type:expType,name,amount,date:dateStr()});await saveData("expenses",expenses);
+  expenses.unshift({type:expType,branch:currentBranch,name,amount,date:dateStr()});await saveData("expenses",expenses);
   document.getElementById("exp-name").value="";document.getElementById("exp-amount").value="";notify("Xarajat qo'shildi","#f59e0b");
 }
 
-// HISOBOT
+// ── HISOBOT ──────────────────────────────────────────────────────────────
 function renderReport(){
   document.getElementById("report-clock").textContent=timeNow();updateStats();
-  const hasData=expenses.length>0||cashSales.length>0||history.length>0;
+  const branchExp=expenses.filter(e=>e.branch===currentBranch);
+  const branchCash=cashSales.filter(c=>c.branch===currentBranch);
+  const branchHist=history.filter(h=>h.branch===currentBranch);
+  const hasData=branchExp.length>0||branchCash.length>0||branchHist.length>0;
   document.getElementById("report-empty").style.display=hasData?"none":"flex";
+
   const expWrap=document.getElementById("exp-list-wrap");
-  if(expenses.length>0){expWrap.style.display="block";const el=document.getElementById("exp-list");el.innerHTML="";
-    expenses.forEach(e=>{const icon=e.type==="click"?"💳":e.type==="bozorlik"?"🛍":e.type==="kassadan"?"💸":"📌";
+  if(branchExp.length>0){expWrap.style.display="block";const el=document.getElementById("exp-list");el.innerHTML="";
+    branchExp.forEach(e=>{const icon=e.type==="click"?"💳":e.type==="bozorlik"?"🛍":e.type==="kassadan"?"💸":"📌";
       const div=document.createElement("div");div.className="order-row";
       div.innerHTML=`<div><div style="font-size:13px">${icon} ${e.name}</div><div style="font-size:11px;color:#475569">${e.date}</div></div><span style="color:#ef4444;font-weight:700">${fmt(e.amount)}</span>`;el.appendChild(div);});
   }else expWrap.style.display="none";
+
   const csWrap=document.getElementById("cash-sales-wrap");
-  if(cashSales.length>0){csWrap.style.display="block";const el=document.getElementById("cash-sales-list");el.innerHTML="";
-    cashSales.forEach(c=>{const div=document.createElement("div");div.className="hist-card";
+  if(branchCash.length>0){csWrap.style.display="block";const el=document.getElementById("cash-sales-list");el.innerHTML="";
+    branchCash.forEach(c=>{const div=document.createElement("div");div.className="hist-card";
       div.innerHTML=`<div class="hist-head"><span>🛒 Naqd sotuv</span><span style="color:#22c55e;font-weight:700">${fmt(c.total)}</span></div><div class="hist-meta">${c.date}</div><div class="hist-orders">${c.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`;el.appendChild(div);});
   }else csWrap.style.display="none";
+
   const hWrap=document.getElementById("history-wrap");
-  if(history.length>0){hWrap.style.display="block";const el=document.getElementById("history-list");el.innerHTML="";
-    history.forEach(h=>{const div=document.createElement("div");div.className="hist-card";
-      div.innerHTML=`<div class="hist-head"><span>🎮 Xona ${h.label}</span><span style="color:#22c55e;font-weight:700">${fmt(h.total)}</span></div><div class="hist-meta">${h.date}</div><div class="hist-row"><span>🎮 ${fmt(h.gameCharge)}</span><span>🛒 ${fmt(h.orderSum)}</span><span>${h.isClick?"💳":"💵"}</span></div>${h.orders&&h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;el.appendChild(div);});
+  if(branchHist.length>0){hWrap.style.display="block";const el=document.getElementById("history-list");el.innerHTML="";
+    branchHist.forEach(h=>{const div=document.createElement("div");div.className="hist-card";
+      div.innerHTML=`<div class="hist-head"><span>🎮 Xona ${h.label}</span><span style="color:#22c55e;font-weight:700">${fmt(h.total)}</span></div><div class="hist-meta">${h.date}${h.floorLabel?" • "+h.floorLabel:""}</div><div class="hist-row"><span>🎮 ${fmt(h.gameCharge)}</span><span>🛒 ${fmt(h.orderSum)}</span><span>${h.isClick?"💳":"💵"}</span></div>${h.orders&&h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;el.appendChild(div);});
   }else hWrap.style.display="none";
 }
 
-// SOZLAMALAR
+// ── SOZLAMALAR — NARX TAHRIRLASH ────────────────────────────────────────
+function setPriceTab(b){
+  priceTab=b;
+  document.getElementById("price-tab-chelsea1").classList.toggle("active",b==="chelsea1");
+  document.getElementById("price-tab-chelsea2").classList.toggle("active",b==="chelsea2");
+  renderPriceEdit();
+}
+
+function renderPriceEdit(){
+  const el=document.getElementById("price-edit-list");
+  el.innerHTML="";
+  const floors=BRANCHES[priceTab].floors;
+  floors.forEach((floor,fIdx)=>{
+    const floorTitle=document.createElement("div");
+    floorTitle.style.cssText="color:#64748b;font-size:11px;margin:10px 0 4px;font-weight:700;";
+    floorTitle.textContent=floor.label;
+    el.appendChild(floorTitle);
+    const roomsInFloor=ROOM_CONFIG.filter(r=>r.branch===priceTab&&r.floorIdx===fIdx);
+    roomsInFloor.forEach(r=>{
+      const row=document.createElement("div");
+      row.className="price-edit-row";
+      row.innerHTML=`<span>Xona ${r.label}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" class="price-input" id="price-input-${r.id}" value="${r.price}"/>
+          <button onclick="saveOneRoomPrice('${r.id}')" style="background:#16a34a33;border:none;color:#86efac;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:700">✓</button>
+        </div>`;
+      el.appendChild(row);
+    });
+  });
+}
+
+async function saveOneRoomPrice(rid){
+  const input=document.getElementById("price-input-"+rid);
+  const newPrice=Number(input.value);
+  if(!newPrice||newPrice<=0)return;
+  customPrices[rid]=newPrice;
+  await saveRoomPrices(customPrices);
+  const cfg=ROOM_CONFIG.find(r=>r.id===rid);
+  if(cfg)cfg.price=newPrice;
+  if(rooms[rid]&&!rooms[rid].active)rooms[rid].price=newPrice;
+  notify("Narx yangilandi: "+fmt(newPrice),"#22c55e");
+}
+
 function renderSettings(){
+  renderPriceEdit();
   const catRow=document.getElementById("new-prod-cat-row");catRow.innerHTML="";
   CATS.forEach(c=>{const btn=document.createElement("button");btn.className="cat-btn"+(newProdCat===c?" active":"");
     btn.textContent=(CE[c]||"")+" "+c;btn.onclick=()=>{newProdCat=c;renderSettings();};catRow.appendChild(btn);});
@@ -653,13 +779,14 @@ async function clearDay(){
   notify("Kun tozalandi","#ef4444");renderSettings();
 }
 
-// TIMER
+// ── TIMER ────────────────────────────────────────────────────────────────
 setInterval(()=>{
   if(!document.getElementById("page-dashboard").classList.contains("hidden"))renderDashboard();
   if(!document.getElementById("page-room").classList.contains("hidden"))renderRoom();
 },30000);
 
-// START
+// ── START ────────────────────────────────────────────────────────────────
+setBranch("chelsea1");
 listenAll();
 goPage("dashboard");
 </script>
