@@ -4,31 +4,28 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>PlayStation Boshqaruv</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#0a0f1e;color:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
-button{cursor:pointer;font-family:inherit}
-input{font-family:inherit}
+button{cursor:pointer;font-family:inherit}input{font-family:inherit}
 .page{padding:16px 12px 90px;min-height:100vh}
+.hidden{display:none!important}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #1e293b}
 .logo{font-size:17px;font-weight:800;color:#c7d2fe}
 .logo-sub{font-size:10px;color:#475569;margin-top:2px}
 .clock{font-size:12px;color:#64748b}
 .active-tag{background:#16a34a22;color:#22c55e;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
 .notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 8px 32px #0009;white-space:nowrap}
-.notif.hidden{display:none}
-.loading{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0f1eee;display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:16px}
-.loading.hidden{display:none}
-.spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
 .stat-card{background:#111827;border-radius:14px;padding:12px 10px;border-left:3px solid;display:flex;flex-direction:column;gap:2px}
-.stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+.stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
 .stat-val{font-size:20px;font-weight:800;line-height:1}
 .stat-sub{font-size:10px;color:#475569}
 .quick-row{display:flex;gap:8px;margin-bottom:16px}
 .quick-btn{flex:1;border:1px solid;border-radius:12px;padding:11px 0;color:#fff;font-size:13px;font-weight:700}
-.floor-label{font-size:11px;color:#64748b;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.floor-label{font-size:11px;color:#64748b;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
 .room-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
 .room-btn{border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:66px;border:2px solid}
 .room-num{font-size:14px;font-weight:800;color:#e2e8f0}
@@ -36,7 +33,7 @@ input{font-family:inherit}
 .room-money{font-size:9px;color:#86efac;font-weight:700;text-align:center}
 .room-free{font-size:9px;color:#1e293b}
 .section{background:#111827;border-radius:16px;padding:14px;margin-bottom:12px}
-.sec-title{font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.sec-title{font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .info-card{background:#111827;border-radius:12px;padding:10px}
 .info-label{font-size:10px;color:#64748b;margin-bottom:3px}
@@ -54,27 +51,26 @@ input{font-family:inherit}
 .cat-btn.active-green{background:#16a34a;border-color:#22c55e}
 .prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .prod-card{border:1px solid #334155;border-radius:12px;padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;background:#1e293b}
-.prod-card.selected{background:#1e3a5f;border-color:#6366f1}
-.prod-card.selected-green{background:#14532d;border-color:#22c55e}
+.prod-card.sel{background:#1e3a5f;border-color:#6366f1}
+.prod-card.sel-g{background:#14532d;border-color:#22c55e}
 .prod-emoji{font-size:26px}
 .prod-name{font-size:10px;color:#e2e8f0;text-align:center;line-height:1.3}
 .prod-price{font-size:10px;color:#818cf8;font-weight:700}
 .prod-badge{position:absolute;top:-6px;right:-6px;background:#6366f1;color:#fff;border-radius:50%;width:19px;height:19px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
-.prod-badge.green{background:#16a34a}
+.prod-badge.g{background:#16a34a}
 .confirm-box{background:#111827;border-radius:16px;padding:14px;margin-top:8px}
-.confirm-title{font-size:12px;font-weight:700;color:#c7d2fe;margin-bottom:10px;text-transform:uppercase}
 .confirm-line{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:#94a3b8}
 .confirm-total{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;font-weight:700;border-top:1px solid #334155;margin-top:4px}
 .change-green{background:#16a34a22;color:#86efac;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;margin-bottom:6px}
 .change-red{background:#ef444422;color:#f87171;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;margin-bottom:6px}
-.click-section{background:#2d1b4e;border-radius:12px;padding:12px;margin-top:10px}
+.click-sec{background:#2d1b4e;border-radius:12px;padding:12px;margin-top:10px}
 .pay-label{font-size:12px;color:#94a3b8;font-weight:600;margin-bottom:8px}
 .btn-row{display:flex;gap:8px;margin-top:10px}
 .btn-green{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;width:100%;margin-top:6px}
 .btn-red{background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:13px;color:#fff;padding:14px 0;font-size:14px;font-weight:800;width:100%;margin-top:8px}
 .btn-purple{background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;width:100%;margin-top:6px}
 .btn-gray{background:#334155;border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;flex:1}
-.btn-confirm-green{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;flex:2}
+.btn-cg{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:11px;color:#fff;padding:12px 0;font-size:13px;font-weight:700;flex:2}
 input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;margin-bottom:8px;outline:none}
 .big-open{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:14px;color:#fff;padding:16px 0;font-size:16px;font-weight:800;width:100%;margin-top:16px}
 .centered{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:60px;gap:10px}
@@ -92,17 +88,10 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
 .nav-icon{font-size:22px}
 .exp-type-btn{border:1px solid #334155;border-radius:20px;padding:5px 12px;color:#fff;font-size:11px;font-weight:600;background:#1e293b;margin-right:6px;margin-bottom:6px}
 .exp-type-btn.active{background:#dc2626;border-color:#ef4444}
-.hidden{display:none}
 </style>
 </head>
 <body>
-
-<div id="loading" class="loading">
-  <div class="spinner"></div>
-  <div style="color:#64748b;font-size:14px">Yuklanmoqda...</div>
-</div>
-
-<div id="notif" class="notif hidden"></div>
+<div id="notif" class="hidden notif"></div>
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page hidden">
@@ -173,20 +162,20 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
       <button class="btn-red" onclick="showConfirm()">🔴 Xonani Yopish va Hisoblash</button>
     </div>
     <div id="room-confirm" class="confirm-box hidden">
-      <div class="confirm-title">💳 To'lov</div>
+      <div class="sec-title">💳 To'lov</div>
       <div class="confirm-line"><span>O'yin vaqti</span><span id="c-game">0</span></div>
       <div class="confirm-line"><span>Mahsulotlar</span><span id="c-ords">0</span></div>
       <div class="confirm-total"><span>JAMI</span><span style="color:#22c55e" id="c-total">0</span></div>
       <input type="number" id="cash-input" placeholder="Mijoz bergan naqd pul" oninput="calcChange()"/>
       <div id="change-box"></div>
       <div class="btn-row">
-        <button class="btn-confirm-green" onclick="closeRoom(false)">✅ Naqd Tasdiqlash</button>
+        <button class="btn-cg" onclick="closeRoom(false)">✅ Naqd</button>
         <button class="btn-gray" onclick="hideConfirm()">Bekor</button>
       </div>
-      <div class="click-section">
-        <div class="pay-label">💳 Click / Payme orqali to'lash</div>
-        <div class="confirm-line" style="font-weight:700"><span>To'lov summasi</span><span style="color:#a78bfa" id="c-click-total">0</span></div>
-        <button class="btn-purple" onclick="closeRoom(true)">💳 Click / Payme Tasdiqlash</button>
+      <div class="click-sec">
+        <div class="pay-label">💳 Click / Payme</div>
+        <div class="confirm-line" style="font-weight:700"><span>To'lov</span><span style="color:#a78bfa" id="c-click-total">0</span></div>
+        <button class="btn-purple" onclick="closeRoom(true)">💳 Click / Payme</button>
       </div>
     </div>
   </div>
@@ -210,7 +199,7 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
     <div class="cat-scroll" id="kassa-cats"></div>
     <div class="prod-grid" id="kassa-prods"></div>
     <div id="kassa-order-wrap" style="display:none;margin-top:12px">
-      <div class="sec-title">Tanlangan mahsulotlar</div>
+      <div class="sec-title">Tanlangan</div>
       <div id="kassa-order-list"></div>
       <div class="confirm-total"><span>JAMI</span><span style="color:#22c55e" id="kassa-total">0</span></div>
       <button class="btn-green" onclick="confirmCashSale()">✅ Naqd Kirimga Yozish</button>
@@ -256,28 +245,16 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
   <div class="section">
     <div class="sec-title">💸 Xarajatlar</div>
-    <div class="order-row"><span style="color:#94a3b8">💳 Click / Payme</span><span style="color:#a78bfa;font-weight:700" id="r-click">0 so'm</span></div>
+    <div class="order-row"><span style="color:#94a3b8">💳 Click/Payme</span><span style="color:#a78bfa;font-weight:700" id="r-click">0 so'm</span></div>
     <div class="order-row"><span style="color:#94a3b8">📦 Boshqa</span><span style="color:#ef4444;font-weight:700" id="r-other">0 so'm</span></div>
     <div class="order-row" style="border-top:1px solid #334155;padding-top:8px;margin-top:4px;font-weight:700">
       <span>Jami xarajat</span><span style="color:#ef4444;font-size:16px" id="r-exp-total">0 so'm</span>
     </div>
   </div>
-  <div class="section" id="exp-list-wrap" style="display:none">
-    <div class="sec-title">📋 Xarajatlar Ro'yxati</div>
-    <div id="exp-list"></div>
-  </div>
-  <div class="section" id="cash-sales-wrap" style="display:none">
-    <div class="sec-title">💵 Naqd Sotuvlar</div>
-    <div id="cash-sales-list"></div>
-  </div>
-  <div class="section" id="history-wrap" style="display:none">
-    <div class="sec-title">🎮 Xona Sessiyalari</div>
-    <div id="history-list"></div>
-  </div>
-  <div id="report-empty" class="centered" style="display:none">
-    <div style="font-size:56px">📋</div>
-    <div class="empty-text">Hali ma'lumot yo'q</div>
-  </div>
+  <div class="section" id="exp-list-wrap" style="display:none"><div class="sec-title">📋 Xarajatlar</div><div id="exp-list"></div></div>
+  <div class="section" id="cash-sales-wrap" style="display:none"><div class="sec-title">💵 Naqd Sotuvlar</div><div id="cash-sales-list"></div></div>
+  <div class="section" id="history-wrap" style="display:none"><div class="sec-title">🎮 Sessiyalar</div><div id="history-list"></div></div>
+  <div id="report-empty" class="centered"><div style="font-size:56px">📋</div><div class="empty-text">Hali ma'lumot yo'q</div></div>
   <div class="bottom-nav">
     <button class="nav-btn" onclick="goPage('dashboard')"><span class="nav-icon">🏠</span>Bosh</button>
     <button class="nav-btn" onclick="goPage('kassa')"><span class="nav-icon">💵</span>Kassa</button>
@@ -299,11 +276,11 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   <div class="section">
     <div class="sec-title">🛒 Mahsulot Qo'shish</div>
     <div style="display:flex;gap:6px;margin-bottom:8px">
-      <input type="text" id="new-prod-name" placeholder="Mahsulot nomi" style="margin:0;flex:2"/>
+      <input type="text" id="new-prod-name" placeholder="Nomi" style="margin:0;flex:2"/>
       <input type="number" id="new-prod-price" placeholder="Narx" style="margin:0;flex:1"/>
     </div>
     <div class="cat-scroll" id="new-prod-cat-row"></div>
-    <button class="btn-green" style="margin-top:6px" onclick="addProduct()">➕ Mahsulot Qo'shish</button>
+    <button class="btn-green" style="margin-top:6px" onclick="addProduct()">➕ Qo'shish</button>
     <div style="margin-top:14px" id="prod-list-settings"></div>
   </div>
   <div class="section">
@@ -317,25 +294,20 @@ input{width:100%;background:#0a0f1e;border:1px solid #334155;border-radius:10px;
   </div>
 </div>
 
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+<script>
+// FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyA-BfBE8Z2xPuEwJ8UIiS7eiycAS6_kisE",
   authDomain: "playsteshn-e90e9.firebaseapp.com",
   projectId: "playsteshn-e90e9",
   storageBucket: "playsteshn-e90e9.firebasestorage.app",
   messagingSenderId: "1086762664975",
-  appId: "1:1086762664975:web:dfeb951e3ff758eb324f7a",
-  measurementId: "G-9EBMGJPPX9"
+  appId: "1:1086762664975:web:dfeb951e3ff758eb324f7a"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ── XONALAR ──────────────────────────────────────────────────────────────────
+// XONALAR
 const ROOM_CONFIG = [
   ...Array.from({length:7},(_,i)=>({id:i+1,label:`${i+1}`,price:22000})),
   {id:8,label:"8",price:28000},{id:9,label:"9",price:28000},{id:10,label:"10",price:28000},
@@ -343,8 +315,8 @@ const ROOM_CONFIG = [
   ...Array.from({length:7},(_,i)=>({id:i+26,label:`10${i+1}`,price:28000})),
 ];
 
-// ── MAHSULOTLAR ──────────────────────────────────────────────────────────────
-window.PRODUCTS = [
+// MAHSULOTLAR
+let PRODUCTS = [
   {id:1,name:"Coca-Cola",price:17000,cat:"Ichimlik",emoji:"🥤"},
   {id:2,name:"Pepsi",price:18000,cat:"Ichimlik",emoji:"🥤"},
   {id:3,name:"Fanta",price:17000,cat:"Ichimlik",emoji:"🧡"},
@@ -378,514 +350,318 @@ window.PRODUCTS = [
   {id:31,name:"Non Burger",price:35000,cat:"Fast Food",emoji:"🍔"},
   {id:32,name:"Haggi",price:25000,cat:"Fast Food",emoji:"🍗"},
 ];
+const CATS=["Ichimlik","Energetik","Snak","Qurt","Fast Food"];
+const CE={Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
 
-const CATS = ["Ichimlik","Energetik","Snak","Qurt","Fast Food"];
-const CAT_EMOJIS = {Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
+// STATE
+let rooms={};
+ROOM_CONFIG.forEach(r=>{rooms[r.id]={active:false,startTime:null,orders:[],price:r.price};});
+let expenses=[],cashSales=[],history=[];
+let selRoom=null,activeRoomCat=CATS[0],kassaCat=CATS[0],kassaOrders=[],expType="bozorlik",newProdCat=CATS[0];
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-window.rooms = {};
-ROOM_CONFIG.forEach(r=>{window.rooms[r.id]={active:false,startTime:null,orders:[],price:r.price};});
-window.expenses = [];
-window.cashSales = [];
-window.history = [];
-window.selRoom = null;
-window.activeRoomCat = CATS[0];
-window.kassaCat = CATS[0];
-window.kassaOrders = [];
-window.expType = "bozorlik";
-window.newProdCat = CATS[0];
+// HELPERS
+const fmt=n=>Number(n).toLocaleString("uz-UZ")+" so'm";
+const fmtS=n=>{n=Number(n);if(n>=1000000)return(n/1000000).toFixed(1)+"mln";if(n>=1000)return(n/1000).toFixed(0)+"k";return String(n);};
+const elapsed=iso=>{const d=Date.now()-new Date(iso).getTime(),h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}s ${m}d`:`${m}d`;};
+const elapsedH=iso=>(Date.now()-new Date(iso).getTime())/3600000;
+const timeNow=()=>new Date().toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit"});
+const dateStr=()=>new Date().toLocaleString("uz-UZ");
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-window.fmt = n => Number(n).toLocaleString("uz-UZ")+" so'm";
-window.fmtS = n => {n=Number(n);if(n>=1000000)return(n/1000000).toFixed(1)+"mln";if(n>=1000)return(n/1000).toFixed(0)+"k";return String(n);};
-window.elapsed = iso => {const d=Date.now()-new Date(iso).getTime(),h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?`${h}s ${m}d`:`${m}d`;};
-window.elapsedH = iso => (Date.now()-new Date(iso).getTime())/3600000;
-window.timeNow = () => new Date().toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit"});
-window.dateStr = () => new Date().toLocaleString("uz-UZ");
-
-window.notify = (msg, color="#22c55e") => {
+let notifTimer;
+function notify(msg,color="#22c55e"){
   const el=document.getElementById("notif");
   el.textContent=msg;el.style.background=color;el.classList.remove("hidden");
-  setTimeout(()=>el.classList.add("hidden"),2800);
-};
-
-window.rGame = rid => {const r=window.rooms[rid];if(!r||!r.active)return 0;return Math.round(window.elapsedH(r.startTime)*r.price);};
-window.rOrds = rid => (window.rooms[rid]?.orders||[]).reduce((s,o)=>s+o.price*o.qty,0);
-window.rTotal = rid => window.rGame(rid)+window.rOrds(rid);
-
-// ── FIREBASE SYNC ────────────────────────────────────────────────────────────
-async function saveRoom(rid) {
-  await setDoc(doc(db,"rooms",String(rid)), window.rooms[rid]);
-}
-async function saveExpenses() {
-  await setDoc(doc(db,"data","expenses"), {list: window.expenses});
-}
-async function saveCashSales() {
-  await setDoc(doc(db,"data","cashSales"), {list: window.cashSales});
-}
-async function saveHistory() {
-  await setDoc(doc(db,"data","history"), {list: window.history});
-}
-async function saveProducts() {
-  await setDoc(doc(db,"data","products"), {list: window.PRODUCTS});
+  clearTimeout(notifTimer);notifTimer=setTimeout(()=>el.classList.add("hidden"),2800);
 }
 
-// Real-time tinglash
-function listenAll() {
-  // Xonalar
-  ROOM_CONFIG.forEach(r => {
-    onSnapshot(doc(db,"rooms",String(r.id)), snap => {
-      if(snap.exists()) {
-        window.rooms[r.id] = snap.data();
-      }
-      if(document.getElementById("page-dashboard") && !document.getElementById("page-dashboard").classList.contains("hidden")) {
-        renderDashboard();
-      }
-      if(window.selRoom===r.id && !document.getElementById("page-room").classList.contains("hidden")) {
-        renderRoom();
-      }
+const rGame=rid=>{const r=rooms[rid];if(!r||!r.active)return 0;return Math.round(elapsedH(r.startTime)*r.price);};
+const rOrds=rid=>(rooms[rid]?.orders||[]).reduce((s,o)=>s+o.price*o.qty,0);
+const rTotal=rid=>rGame(rid)+rOrds(rid);
+
+// FIREBASE SAVE
+async function saveRoom(rid){try{await db.collection("rooms").doc(String(rid)).set(rooms[rid]);}catch(e){console.log(e);}}
+async function saveData(key,val){try{await db.collection("data").doc(key).set({list:val});}catch(e){console.log(e);}}
+
+// LISTEN
+function listenAll(){
+  ROOM_CONFIG.forEach(r=>{
+    db.collection("rooms").doc(String(r.id)).onSnapshot(snap=>{
+      if(snap.exists){rooms[r.id]={...rooms[r.id],...snap.data()};}
+      renderDashboard();
+      if(selRoom===r.id)renderRoom();
     });
   });
-
-  // Boshqa ma'lumotlar
-  onSnapshot(doc(db,"data","expenses"), snap => {
-    if(snap.exists()) window.expenses = snap.data().list || [];
-    updateReportStats();
-  });
-  onSnapshot(doc(db,"data","cashSales"), snap => {
-    if(snap.exists()) window.cashSales = snap.data().list || [];
-    updateReportStats();
-  });
-  onSnapshot(doc(db,"data","history"), snap => {
-    if(snap.exists()) window.history = snap.data().list || [];
-    updateReportStats();
-  });
-  onSnapshot(doc(db,"data","products"), snap => {
-    if(snap.exists()) window.PRODUCTS = snap.data().list || window.PRODUCTS;
-  });
+  db.collection("data").doc("expenses").onSnapshot(snap=>{if(snap.exists)expenses=snap.data().list||[];updateStats();});
+  db.collection("data").doc("cashSales").onSnapshot(snap=>{if(snap.exists)cashSales=snap.data().list||[];updateStats();});
+  db.collection("data").doc("history").onSnapshot(snap=>{if(snap.exists)history=snap.data().list||[];updateStats();});
+  db.collection("data").doc("products").onSnapshot(snap=>{if(snap.exists)PRODUCTS=snap.data().list||PRODUCTS;});
 }
 
-function updateReportStats() {
-  const xona=window.history.reduce((s,h)=>s+h.total,0);
-  const naqd=window.cashSales.reduce((s,c)=>s+c.total,0);
-  const exp=window.expenses.reduce((s,e)=>s+e.amount,0);
-  if(document.getElementById("s-xona")) {
-    document.getElementById("s-xona").textContent=fmtS(xona);
-    document.getElementById("s-naqd").textContent=fmtS(naqd);
-    document.getElementById("s-exp").textContent=fmtS(exp);
-    document.getElementById("s-profit").textContent=fmtS(xona+naqd-exp);
-  }
+function updateStats(){
+  const xona=history.reduce((s,h)=>s+h.total,0);
+  const naqd=cashSales.reduce((s,c)=>s+c.total,0);
+  const exp=expenses.reduce((s,e)=>s+e.amount,0);
+  ["s-xona","r-xona"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(xona);});
+  ["s-naqd","r-naqd"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(naqd);});
+  ["s-exp"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(exp);});
+  ["s-profit","r-profit"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmtS(xona+naqd-exp);});
+  const rki=document.getElementById("r-kirim");if(rki)rki.textContent=fmtS(xona+naqd);
+  const clickE=expenses.filter(e=>e.type==="click").reduce((s,e)=>s+e.amount,0);
+  const otherE=expenses.filter(e=>e.type!=="click").reduce((s,e)=>s+e.amount,0);
+  const rclk=document.getElementById("r-click");if(rclk)rclk.textContent=fmt(clickE);
+  const roth=document.getElementById("r-other");if(roth)roth.textContent=fmt(otherE);
+  const rext=document.getElementById("r-exp-total");if(rext)rext.textContent=fmt(clickE+otherE);
 }
 
-// ── BOSHLASH ─────────────────────────────────────────────────────────────────
-async function init() {
-  // Timeout - 5 sekunddan keyin yuklanishni yopamiz
-  setTimeout(() => {
-    document.getElementById("loading").classList.add("hidden");
-    goPage("dashboard");
-  }, 5000);
-  try {
-    listenAll();
-    document.getElementById("loading").classList.add("hidden");
-    goPage("dashboard");
-  } catch(e) {
-    console.error(e);
-    document.getElementById("loading").classList.add("hidden");
-    goPage("dashboard");
-  }
-}
-
-// ── NAVIGATSIYA ──────────────────────────────────────────────────────────────
-window.goPage = p => {
-  ["dashboard","room","kassa","report","settings"].forEach(id=>{
-    document.getElementById("page-"+id).classList.add("hidden");
-  });
+// NAV
+function goPage(p){
+  ["dashboard","room","kassa","report","settings"].forEach(id=>document.getElementById("page-"+id).classList.add("hidden"));
   document.getElementById("page-"+p).classList.remove("hidden");
-  if(p==="dashboard") renderDashboard();
-  if(p==="room") renderRoom();
-  if(p==="kassa") renderKassa();
-  if(p==="report") renderReport();
-  if(p==="settings") renderSettings();
-};
+  if(p==="dashboard")renderDashboard();
+  if(p==="room")renderRoom();
+  if(p==="kassa")renderKassa();
+  if(p==="report")renderReport();
+  if(p==="settings")renderSettings();
+}
 
-// ── DASHBOARD ────────────────────────────────────────────────────────────────
-window.renderDashboard = () => {
+// DASHBOARD
+function renderDashboard(){
   document.getElementById("dash-clock").textContent=timeNow();
-  const activeCount=ROOM_CONFIG.filter(r=>window.rooms[r.id]?.active).length;
-  document.getElementById("dash-active").textContent=activeCount+" faol xona";
-  updateReportStats();
-  renderRoomGrid("rooms-floor1", ROOM_CONFIG.filter(r=>r.id<=25));
-  renderRoomGrid("rooms-floor2", ROOM_CONFIG.filter(r=>r.id>25));
-};
+  const ac=ROOM_CONFIG.filter(r=>rooms[r.id]?.active).length;
+  document.getElementById("dash-active").textContent=ac+" faol xona";
+  updateStats();
+  renderRoomGrid("rooms-floor1",ROOM_CONFIG.filter(r=>r.id<=25));
+  renderRoomGrid("rooms-floor2",ROOM_CONFIG.filter(r=>r.id>25));
+}
 
-function renderRoomGrid(elId, list) {
-  const el=document.getElementById(elId);
-  el.innerHTML="";
+function renderRoomGrid(elId,list){
+  const el=document.getElementById(elId);el.innerHTML="";
   list.forEach(r=>{
-    const room=window.rooms[r.id]||{active:false};
-    const active=room.active;
+    const room=rooms[r.id]||{active:false};
+    const a=room.active;
     const btn=document.createElement("button");
     btn.className="room-btn";
-    btn.style.background=active?"#1e3a5f":"#111827";
-    btn.style.borderColor=active?"#6366f1":"#1e293b";
-    btn.innerHTML=`<span class="room-num">${r.label}</span>`+
-      (active?`<span class="room-time">${elapsed(room.startTime)}</span><span class="room-money">${fmtS(rTotal(r.id))}</span>`:`<span class="room-free">Bo'sh</span>`);
-    btn.onclick=()=>{window.selRoom=r.id;window.activeRoomCat=CATS[0];goPage("room");};
+    btn.style.background=a?"#1e3a5f":"#111827";
+    btn.style.borderColor=a?"#6366f1":"#1e293b";
+    btn.innerHTML=`<span class="room-num">${r.label}</span>`+(a?`<span class="room-time">${elapsed(room.startTime)}</span><span class="room-money">${fmtS(rTotal(r.id))}</span>`:`<span class="room-free">Bo'sh</span>`);
+    btn.onclick=()=>{selRoom=r.id;activeRoomCat=CATS[0];goPage("room");};
     el.appendChild(btn);
   });
 }
 
-// ── XONA ─────────────────────────────────────────────────────────────────────
-window.renderRoom = () => {
-  if(!window.selRoom) return;
-  const r=window.rooms[window.selRoom]||{active:false,orders:[]};
-  const cfg=ROOM_CONFIG.find(c=>c.id===window.selRoom);
+// XONA
+function renderRoom(){
+  if(!selRoom)return;
+  const r=rooms[selRoom]||{active:false,orders:[]};
+  const cfg=ROOM_CONFIG.find(c=>c.id===selRoom);
   document.getElementById("room-title").textContent="Xona "+cfg.label;
   document.getElementById("room-price-label").textContent=fmt(cfg.price)+"/soat";
   document.getElementById("room-clock").textContent=timeNow();
   document.getElementById("room-closed").style.display=r.active?"none":"block";
-  document.getElementById("room-open").style.display=r.active?"block":"none";
+  document.getElementById("room-open").classList.toggle("hidden",!r.active);
   if(r.active){
     document.getElementById("r-elapsed").textContent=elapsed(r.startTime);
-    document.getElementById("r-game").textContent=fmt(rGame(window.selRoom));
-    document.getElementById("r-ords").textContent=fmt(rOrds(window.selRoom));
-    document.getElementById("r-total").textContent=fmt(rTotal(window.selRoom));
-    renderRoomOrders();
-    renderRoomProducts();
+    document.getElementById("r-game").textContent=fmt(rGame(selRoom));
+    document.getElementById("r-ords").textContent=fmt(rOrds(selRoom));
+    document.getElementById("r-total").textContent=fmt(rTotal(selRoom));
+    renderRoomOrders();renderRoomProducts();
   }
-};
+}
 
-function renderRoomOrders() {
-  const r=window.rooms[window.selRoom];
-  const wrap=document.getElementById("room-order-list-wrap");
-  const el=document.getElementById("room-order-list");
+function renderRoomOrders(){
+  const r=rooms[selRoom];const wrap=document.getElementById("room-order-list-wrap");const el=document.getElementById("room-order-list");
   if(!r.orders||r.orders.length===0){wrap.style.display="none";return;}
-  wrap.style.display="block";
-  el.innerHTML="";
+  wrap.style.display="block";el.innerHTML="";
   r.orders.forEach(o=>{
-    const div=document.createElement("div");
-    div.className="order-row";
-    div.innerHTML=`<span class="ord-name">${o.emoji} ${o.name}</span>
-      <div class="ord-right">
-        <button class="q-btn" onclick="chRoomQty(${o.id},-1)">−</button>
-        <span class="q-num">${o.qty}</span>
-        <button class="q-btn" onclick="chRoomQty(${o.id},1)">+</button>
-        <span class="ord-amt">${fmt(o.price*o.qty)}</span>
-      </div>`;
+    const div=document.createElement("div");div.className="order-row";
+    div.innerHTML=`<span class="ord-name">${o.emoji} ${o.name}</span><div class="ord-right"><button class="q-btn" onclick="chRoomQty(${o.id},-1)">−</button><span class="q-num">${o.qty}</span><button class="q-btn" onclick="chRoomQty(${o.id},1)">+</button><span class="ord-amt">${fmt(o.price*o.qty)}</span></div>`;
     el.appendChild(div);
   });
 }
 
-function renderRoomProducts() {
-  const catEl=document.getElementById("room-cats");
-  catEl.innerHTML="";
+function renderRoomProducts(){
+  const catEl=document.getElementById("room-cats");catEl.innerHTML="";
   CATS.forEach(c=>{
-    const btn=document.createElement("button");
-    btn.className="cat-btn"+(window.activeRoomCat===c?" active":"");
-    btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{window.activeRoomCat=c;renderRoomProducts();};
-    catEl.appendChild(btn);
+    const btn=document.createElement("button");btn.className="cat-btn"+(activeRoomCat===c?" active":"");
+    btn.textContent=(CE[c]||"")+" "+c;btn.onclick=()=>{activeRoomCat=c;renderRoomProducts();};catEl.appendChild(btn);
   });
-  const el=document.getElementById("room-prods");
-  el.innerHTML="";
-  const r=window.rooms[window.selRoom];
-  window.PRODUCTS.filter(p=>p.cat===window.activeRoomCat).forEach(p=>{
+  const el=document.getElementById("room-prods");el.innerHTML="";
+  const r=rooms[selRoom];
+  PRODUCTS.filter(p=>p.cat===activeRoomCat).forEach(p=>{
     const inO=(r.orders||[]).find(o=>o.id===p.id);
-    const btn=document.createElement("button");
-    btn.className="prod-card"+(inO?" selected":"");
-    btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span>
-      <span class="prod-name">${p.name}</span>
-      <span class="prod-price">${fmt(p.price)}</span>
-      ${inO?`<span class="prod-badge">${inO.qty}</span>`:""}`;
-    btn.onclick=()=>addRoomOrder(p);
-    el.appendChild(btn);
+    const btn=document.createElement("button");btn.className="prod-card"+(inO?" sel":"");
+    btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span><span class="prod-name">${p.name}</span><span class="prod-price">${fmt(p.price)}</span>${inO?`<span class="prod-badge">${inO.qty}</span>`:""}`;
+    btn.onclick=()=>addRoomOrder(p);el.appendChild(btn);
   });
 }
 
-window.addRoomOrder = async prod => {
-  const r=window.rooms[window.selRoom];
-  const orders=r.orders||[];
-  const ex=orders.find(o=>o.id===prod.id);
-  const newOrders=ex?orders.map(o=>o.id===prod.id?{...o,qty:o.qty+1}:o):[...orders,{...prod,qty:1}];
-  window.rooms[window.selRoom]={...r,orders:newOrders};
-  await saveRoom(window.selRoom);
-  renderRoom();
-};
+async function addRoomOrder(prod){
+  const r=rooms[selRoom];const orders=r.orders||[];const ex=orders.find(o=>o.id===prod.id);
+  rooms[selRoom]={...r,orders:ex?orders.map(o=>o.id===prod.id?{...o,qty:o.qty+1}:o):[...orders,{...prod,qty:1}]};
+  await saveRoom(selRoom);renderRoom();
+}
 
-window.chRoomQty = async (pid,d) => {
-  const r=window.rooms[window.selRoom];
-  const orders=(r.orders||[]).map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
-  window.rooms[window.selRoom]={...r,orders};
-  await saveRoom(window.selRoom);
-  renderRoom();
-};
+async function chRoomQty(pid,d){
+  const r=rooms[selRoom];
+  rooms[selRoom]={...r,orders:(r.orders||[]).map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0)};
+  await saveRoom(selRoom);renderRoom();
+}
 
-window.openRoom = async () => {
-  const cfg=ROOM_CONFIG.find(r=>r.id===window.selRoom);
-  window.rooms[window.selRoom]={active:true,startTime:new Date().toISOString(),orders:[],price:cfg.price};
-  await saveRoom(window.selRoom);
-  notify("Xona "+cfg.label+" ochildi ✅");
-  renderRoom();
-};
+async function openRoom(){
+  const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);
+  rooms[selRoom]={active:true,startTime:new Date().toISOString(),orders:[],price:cfg.price};
+  await saveRoom(selRoom);notify("Xona "+cfg.label+" ochildi ✅");renderRoom();
+}
 
-window.showConfirm = () => {
+function showConfirm(){
   document.getElementById("room-close-btn-wrap").style.display="none";
   document.getElementById("room-confirm").classList.remove("hidden");
-  document.getElementById("c-game").textContent=fmt(rGame(window.selRoom));
-  document.getElementById("c-ords").textContent=fmt(rOrds(window.selRoom));
-  document.getElementById("c-total").textContent=fmt(rTotal(window.selRoom));
-  document.getElementById("c-click-total").textContent=fmt(rTotal(window.selRoom));
-  document.getElementById("cash-input").value="";
-  document.getElementById("change-box").innerHTML="";
-};
+  document.getElementById("c-game").textContent=fmt(rGame(selRoom));
+  document.getElementById("c-ords").textContent=fmt(rOrds(selRoom));
+  document.getElementById("c-total").textContent=fmt(rTotal(selRoom));
+  document.getElementById("c-click-total").textContent=fmt(rTotal(selRoom));
+  document.getElementById("cash-input").value="";document.getElementById("change-box").innerHTML="";
+}
 
-window.hideConfirm = () => {
+function hideConfirm(){
   document.getElementById("room-close-btn-wrap").style.display="block";
   document.getElementById("room-confirm").classList.add("hidden");
-};
+}
 
-window.calcChange = () => {
-  const val=Number(document.getElementById("cash-input").value);
-  const total=rTotal(window.selRoom);
-  const el=document.getElementById("change-box");
-  if(!val){el.innerHTML="";return;}
-  if(val>=total) el.innerHTML=`<div class="change-green">Qaytim: <strong>${fmt(val-total)}</strong></div>`;
-  else el.innerHTML=`<div class="change-red">Yetishmaydi: <strong>${fmt(total-val)}</strong></div>`;
-};
+function calcChange(){
+  const val=Number(document.getElementById("cash-input").value);const total=rTotal(selRoom);
+  const el=document.getElementById("change-box");if(!val){el.innerHTML="";return;}
+  el.innerHTML=val>=total?`<div class="change-green">Qaytim: <strong>${fmt(val-total)}</strong></div>`:`<div class="change-red">Yetishmaydi: <strong>${fmt(total-val)}</strong></div>`;
+}
 
-window.closeRoom = async isClick => {
-  const cfg=ROOM_CONFIG.find(r=>r.id===window.selRoom);
-  const r=window.rooms[window.selRoom];
-  const total=rTotal(window.selRoom);
+async function closeRoom(isClick){
+  const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);const r=rooms[selRoom];const total=rTotal(selRoom);
   const cash=Number(document.getElementById("cash-input").value)||total;
-  const rec={rid:window.selRoom,label:cfg.label,date:dateStr(),startTime:r.startTime,
-    orders:[...(r.orders||[])],gameCharge:rGame(window.selRoom),orderSum:rOrds(window.selRoom),total,cash,isClick};
-  window.history.unshift(rec);
-  await saveHistory();
-  if(isClick){
-    window.expenses.unshift({type:"click",name:"Xona "+cfg.label+" — Click orqali to'landi",amount:total,date:dateStr()});
-    await saveExpenses();
-    notify("Click to'lov xarajatga yozildi 💳","#7c3aed");
-  } else {
-    notify("Xona "+cfg.label+" yopildi 💰 "+fmt(total));
-  }
-  const cfg2=ROOM_CONFIG.find(r=>r.id===window.selRoom);
-  window.rooms[window.selRoom]={active:false,startTime:null,orders:[],price:cfg2.price};
-  await saveRoom(window.selRoom);
-  goPage("dashboard");
-};
+  const rec={rid:selRoom,label:cfg.label,date:dateStr(),startTime:r.startTime,orders:[...(r.orders||[])],gameCharge:rGame(selRoom),orderSum:rOrds(selRoom),total,cash,isClick};
+  history.unshift(rec);await saveData("history",history);
+  if(isClick){expenses.unshift({type:"click",name:"Xona "+cfg.label+" — Click",amount:total,date:dateStr()});await saveData("expenses",expenses);notify("Click to'lov yozildi 💳","#7c3aed");}
+  else notify("Xona "+cfg.label+" yopildi 💰 "+fmt(total));
+  rooms[selRoom]={active:false,startTime:null,orders:[],price:cfg.price};
+  await saveRoom(selRoom);goPage("dashboard");
+}
 
-// ── KASSA ─────────────────────────────────────────────────────────────────────
-window.renderKassa = () => {
+// KASSA
+function renderKassa(){
   document.getElementById("kassa-clock").textContent=timeNow();
-  const catEl=document.getElementById("kassa-cats");
-  catEl.innerHTML="";
+  const catEl=document.getElementById("kassa-cats");catEl.innerHTML="";
   CATS.forEach(c=>{
-    const btn=document.createElement("button");
-    btn.className="cat-btn"+(window.kassaCat===c?" active-green":"");
-    btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{window.kassaCat=c;renderKassa();};
-    catEl.appendChild(btn);
+    const btn=document.createElement("button");btn.className="cat-btn"+(kassaCat===c?" active-green":"");
+    btn.textContent=(CE[c]||"")+" "+c;btn.onclick=()=>{kassaCat=c;renderKassa();};catEl.appendChild(btn);
   });
-  const el=document.getElementById("kassa-prods");
-  el.innerHTML="";
-  window.PRODUCTS.filter(p=>p.cat===window.kassaCat).forEach(p=>{
-    const inO=window.kassaOrders.find(o=>o.id===p.id);
-    const btn=document.createElement("button");
-    btn.className="prod-card"+(inO?" selected-green":"");
-    btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span>
-      <span class="prod-name">${p.name}</span>
-      <span class="prod-price">${fmt(p.price)}</span>
-      ${inO?`<span class="prod-badge green">${inO.qty}</span>`:""}`;
-    btn.onclick=()=>{
-      const ex=window.kassaOrders.find(o=>o.id===p.id);
-      if(ex) window.kassaOrders=window.kassaOrders.map(o=>o.id===p.id?{...o,qty:o.qty+1}:o);
-      else window.kassaOrders=[...window.kassaOrders,{...p,qty:1}];
-      renderKassa();
-    };
+  const el=document.getElementById("kassa-prods");el.innerHTML="";
+  PRODUCTS.filter(p=>p.cat===kassaCat).forEach(p=>{
+    const inO=kassaOrders.find(o=>o.id===p.id);
+    const btn=document.createElement("button");btn.className="prod-card"+(inO?" sel-g":"");
+    btn.innerHTML=`<span class="prod-emoji">${p.emoji}</span><span class="prod-name">${p.name}</span><span class="prod-price">${fmt(p.price)}</span>${inO?`<span class="prod-badge g">${inO.qty}</span>`:""}`;
+    btn.onclick=()=>{const ex=kassaOrders.find(o=>o.id===p.id);kassaOrders=ex?kassaOrders.map(o=>o.id===p.id?{...o,qty:o.qty+1}:o):[...kassaOrders,{...p,qty:1}];renderKassa();};
     el.appendChild(btn);
   });
-  const total=window.kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
+  const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
   const wrap=document.getElementById("kassa-order-wrap");
-  if(window.kassaOrders.length===0){wrap.style.display="none";return;}
+  if(kassaOrders.length===0){wrap.style.display="none";return;}
   wrap.style.display="block";
-  const listEl=document.getElementById("kassa-order-list");
-  listEl.innerHTML="";
-  window.kassaOrders.forEach(o=>{
-    const div=document.createElement("div");
-    div.className="order-row";
-    div.innerHTML=`<span class="ord-name">${o.emoji} ${o.name}</span>
-      <div class="ord-right">
-        <button class="q-btn" onclick="chKassaQty(${o.id},-1)">−</button>
-        <span class="q-num">${o.qty}</span>
-        <button class="q-btn" onclick="chKassaQty(${o.id},1)">+</button>
-        <span class="ord-amt">${fmt(o.price*o.qty)}</span>
-      </div>`;
+  const listEl=document.getElementById("kassa-order-list");listEl.innerHTML="";
+  kassaOrders.forEach(o=>{
+    const div=document.createElement("div");div.className="order-row";
+    div.innerHTML=`<span class="ord-name">${o.emoji} ${o.name}</span><div class="ord-right"><button class="q-btn" onclick="chKassaQty(${o.id},-1)">−</button><span class="q-num">${o.qty}</span><button class="q-btn" onclick="chKassaQty(${o.id},1)">+</button><span class="ord-amt">${fmt(o.price*o.qty)}</span></div>`;
     listEl.appendChild(div);
   });
   document.getElementById("kassa-total").textContent=fmt(total);
-};
+}
 
-window.chKassaQty = (pid,d) => {
-  window.kassaOrders=window.kassaOrders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);
-  renderKassa();
-};
+function chKassaQty(pid,d){kassaOrders=kassaOrders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);renderKassa();}
 
-window.confirmCashSale = async () => {
-  if(window.kassaOrders.length===0) return;
-  const total=window.kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
-  window.cashSales.unshift({orders:[...window.kassaOrders],total,date:dateStr()});
-  await saveCashSales();
-  window.kassaOrders=[];
-  notify("Naqd sotuv: "+fmt(total)+" 💵");
-  renderKassa();
-};
+async function confirmCashSale(){
+  if(kassaOrders.length===0)return;
+  const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
+  cashSales.unshift({orders:[...kassaOrders],total,date:dateStr()});
+  await saveData("cashSales",cashSales);kassaOrders=[];notify("Naqd sotuv: "+fmt(total)+" 💵");renderKassa();
+}
 
-window.addClickExpense = async () => {
-  const val=Number(document.getElementById("click-exp-input").value);
-  if(!val) return;
-  window.expenses.unshift({type:"click",name:"Click orqali to'landi",amount:val,date:dateStr()});
-  await saveExpenses();
-  document.getElementById("click-exp-input").value="";
-  notify("Click xarajat qo'shildi 💳","#7c3aed");
-};
+async function addClickExpense(){
+  const val=Number(document.getElementById("click-exp-input").value);if(!val)return;
+  expenses.unshift({type:"click",name:"Click orqali to'landi",amount:val,date:dateStr()});
+  await saveData("expenses",expenses);document.getElementById("click-exp-input").value="";notify("Click xarajat qo'shildi 💳","#7c3aed");
+}
 
-window.setExpType = t => {
-  window.expType=t;
-  ["bozorlik","kassadan","boshqa"].forEach(x=>{
-    document.getElementById("etype-"+x).classList.toggle("active",x===t);
-  });
-};
+function setExpType(t){
+  expType=t;["bozorlik","kassadan","boshqa"].forEach(x=>document.getElementById("etype-"+x).classList.toggle("active",x===t));
+}
 
-window.addExpense = async () => {
-  const name=document.getElementById("exp-name").value.trim();
-  const amount=Number(document.getElementById("exp-amount").value);
-  if(!name||!amount) return;
-  window.expenses.unshift({type:window.expType,name,amount,date:dateStr()});
-  await saveExpenses();
-  document.getElementById("exp-name").value="";
-  document.getElementById("exp-amount").value="";
-  notify("Xarajat qo'shildi","#f59e0b");
-};
+async function addExpense(){
+  const name=document.getElementById("exp-name").value.trim();const amount=Number(document.getElementById("exp-amount").value);
+  if(!name||!amount)return;
+  expenses.unshift({type:expType,name,amount,date:dateStr()});await saveData("expenses",expenses);
+  document.getElementById("exp-name").value="";document.getElementById("exp-amount").value="";notify("Xarajat qo'shildi","#f59e0b");
+}
 
-// ── HISOBOT ──────────────────────────────────────────────────────────────────
-window.renderReport = () => {
-  document.getElementById("report-clock").textContent=timeNow();
-  const xona=window.history.reduce((s,h)=>s+h.total,0);
-  const naqd=window.cashSales.reduce((s,c)=>s+c.total,0);
-  const clickExp=window.expenses.filter(e=>e.type==="click").reduce((s,e)=>s+e.amount,0);
-  const otherExp=window.expenses.filter(e=>e.type!=="click").reduce((s,e)=>s+e.amount,0);
-  const totalExp=clickExp+otherExp;
-  document.getElementById("r-xona").textContent=fmtS(xona);
-  document.getElementById("r-naqd").textContent=fmtS(naqd);
-  document.getElementById("r-kirim").textContent=fmtS(xona+naqd);
-  document.getElementById("r-profit").textContent=fmtS(xona+naqd-totalExp);
-  document.getElementById("r-click").textContent=fmt(clickExp);
-  document.getElementById("r-other").textContent=fmt(otherExp);
-  document.getElementById("r-exp-total").textContent=fmt(totalExp);
-
-  const hasData=window.expenses.length>0||window.cashSales.length>0||window.history.length>0;
+// HISOBOT
+function renderReport(){
+  document.getElementById("report-clock").textContent=timeNow();updateStats();
+  const hasData=expenses.length>0||cashSales.length>0||history.length>0;
   document.getElementById("report-empty").style.display=hasData?"none":"flex";
-
   const expWrap=document.getElementById("exp-list-wrap");
-  if(window.expenses.length>0){
-    expWrap.style.display="block";
-    const el=document.getElementById("exp-list");el.innerHTML="";
-    window.expenses.forEach(e=>{
-      const icon=e.type==="click"?"💳":e.type==="bozorlik"?"🛍":e.type==="kassadan"?"💸":"📌";
+  if(expenses.length>0){expWrap.style.display="block";const el=document.getElementById("exp-list");el.innerHTML="";
+    expenses.forEach(e=>{const icon=e.type==="click"?"💳":e.type==="bozorlik"?"🛍":e.type==="kassadan"?"💸":"📌";
       const div=document.createElement("div");div.className="order-row";
-      div.innerHTML=`<div><div style="font-size:13px">${icon} ${e.name}</div><div style="font-size:11px;color:#475569">${e.date}</div></div><span style="color:#ef4444;font-weight:700">${fmt(e.amount)}</span>`;
-      el.appendChild(div);
-    });
-  } else expWrap.style.display="none";
-
+      div.innerHTML=`<div><div style="font-size:13px">${icon} ${e.name}</div><div style="font-size:11px;color:#475569">${e.date}</div></div><span style="color:#ef4444;font-weight:700">${fmt(e.amount)}</span>`;el.appendChild(div);});
+  }else expWrap.style.display="none";
   const csWrap=document.getElementById("cash-sales-wrap");
-  if(window.cashSales.length>0){
-    csWrap.style.display="block";
-    const el=document.getElementById("cash-sales-list");el.innerHTML="";
-    window.cashSales.forEach(c=>{
-      const div=document.createElement("div");div.className="hist-card";
-      div.innerHTML=`<div class="hist-head"><span>🛒 Naqd sotuv</span><span style="color:#22c55e;font-weight:700">${fmt(c.total)}</span></div>
-        <div class="hist-meta">${c.date}</div>
-        <div class="hist-orders">${c.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`;
-      el.appendChild(div);
-    });
-  } else csWrap.style.display="none";
-
+  if(cashSales.length>0){csWrap.style.display="block";const el=document.getElementById("cash-sales-list");el.innerHTML="";
+    cashSales.forEach(c=>{const div=document.createElement("div");div.className="hist-card";
+      div.innerHTML=`<div class="hist-head"><span>🛒 Naqd sotuv</span><span style="color:#22c55e;font-weight:700">${fmt(c.total)}</span></div><div class="hist-meta">${c.date}</div><div class="hist-orders">${c.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`;el.appendChild(div);});
+  }else csWrap.style.display="none";
   const hWrap=document.getElementById("history-wrap");
-  if(window.history.length>0){
-    hWrap.style.display="block";
-    const el=document.getElementById("history-list");el.innerHTML="";
-    window.history.forEach(h=>{
-      const div=document.createElement("div");div.className="hist-card";
-      div.innerHTML=`<div class="hist-head"><span>🎮 Xona ${h.label}</span><span style="color:#22c55e;font-weight:700">${fmt(h.total)}</span></div>
-        <div class="hist-meta">${h.date}</div>
-        <div class="hist-row"><span>🎮 ${fmt(h.gameCharge)}</span><span>🛒 ${fmt(h.orderSum)}</span><span>${h.isClick?"💳":"💵"}</span></div>
-        ${h.orders&&h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;
-      el.appendChild(div);
-    });
-  } else hWrap.style.display="none";
-};
+  if(history.length>0){hWrap.style.display="block";const el=document.getElementById("history-list");el.innerHTML="";
+    history.forEach(h=>{const div=document.createElement("div");div.className="hist-card";
+      div.innerHTML=`<div class="hist-head"><span>🎮 Xona ${h.label}</span><span style="color:#22c55e;font-weight:700">${fmt(h.total)}</span></div><div class="hist-meta">${h.date}</div><div class="hist-row"><span>🎮 ${fmt(h.gameCharge)}</span><span>🛒 ${fmt(h.orderSum)}</span><span>${h.isClick?"💳":"💵"}</span></div>${h.orders&&h.orders.length>0?`<div class="hist-orders">${h.orders.map(o=>`${o.emoji}${o.name}×${o.qty}`).join("  ")}</div>`:""}`;el.appendChild(div);});
+  }else hWrap.style.display="none";
+}
 
-// ── SOZLAMALAR ────────────────────────────────────────────────────────────────
-window.renderSettings = () => {
-  const catRow=document.getElementById("new-prod-cat-row");
-  catRow.innerHTML="";
-  CATS.forEach(c=>{
-    const btn=document.createElement("button");
-    btn.className="cat-btn"+(window.newProdCat===c?" active":"");
-    btn.textContent=(CAT_EMOJIS[c]||"")+" "+c;
-    btn.onclick=()=>{window.newProdCat=c;renderSettings();};
-    catRow.appendChild(btn);
-  });
+// SOZLAMALAR
+function renderSettings(){
+  const catRow=document.getElementById("new-prod-cat-row");catRow.innerHTML="";
+  CATS.forEach(c=>{const btn=document.createElement("button");btn.className="cat-btn"+(newProdCat===c?" active":"");
+    btn.textContent=(CE[c]||"")+" "+c;btn.onclick=()=>{newProdCat=c;renderSettings();};catRow.appendChild(btn);});
   const el=document.getElementById("prod-list-settings");el.innerHTML="";
-  window.PRODUCTS.forEach(p=>{
-    const div=document.createElement("div");div.className="order-row";
-    div.innerHTML=`<span>${p.emoji} ${p.name} <span style="color:#64748b;font-size:11px">(${p.cat})</span></span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="color:#818cf8">${fmt(p.price)}</span>
-        <button onclick="removeProduct(${p.id})" style="background:#dc262633;border:none;color:#f87171;border-radius:6px;padding:3px 8px;font-size:12px">✕</button>
-      </div>`;
-    el.appendChild(div);
-  });
-};
+  PRODUCTS.forEach(p=>{const div=document.createElement("div");div.className="order-row";
+    div.innerHTML=`<span>${p.emoji} ${p.name} <span style="color:#64748b;font-size:11px">(${p.cat})</span></span><div style="display:flex;align-items:center;gap:8px"><span style="color:#818cf8">${fmt(p.price)}</span><button onclick="removeProduct(${p.id})" style="background:#dc262633;border:none;color:#f87171;border-radius:6px;padding:3px 8px;font-size:12px">✕</button></div>`;el.appendChild(div);});
+}
 
-window.addProduct = async () => {
-  const name=document.getElementById("new-prod-name").value.trim();
-  const price=Number(document.getElementById("new-prod-price").value);
-  if(!name||!price) return;
-  const emojis={Ichimlik:"🥤",Energetik:"⚡",Snak:"🍟",Qurt:"🧀","Fast Food":"🌭"};
-  const newId=Math.max(...window.PRODUCTS.map(p=>p.id))+1;
-  window.PRODUCTS.push({id:newId,name,price,cat:window.newProdCat,emoji:emojis[window.newProdCat]||"📦"});
-  await saveProducts();
-  document.getElementById("new-prod-name").value="";
-  document.getElementById("new-prod-price").value="";
-  notify(name+" qo'shildi ✅");
-  renderSettings();
-};
+async function addProduct(){
+  const name=document.getElementById("new-prod-name").value.trim();const price=Number(document.getElementById("new-prod-price").value);
+  if(!name||!price)return;
+  const newId=Math.max(...PRODUCTS.map(p=>p.id))+1;
+  PRODUCTS.push({id:newId,name,price,cat:newProdCat,emoji:CE[newProdCat]||"📦"});
+  await saveData("products",PRODUCTS);document.getElementById("new-prod-name").value="";document.getElementById("new-prod-price").value="";
+  notify(name+" qo'shildi ✅");renderSettings();
+}
 
-window.removeProduct = async id => {
-  window.PRODUCTS=window.PRODUCTS.filter(p=>p.id!==id);
-  await saveProducts();
-  notify("Mahsulot o'chirildi","#ef4444");
-  renderSettings();
-};
+async function removeProduct(id){
+  PRODUCTS=PRODUCTS.filter(p=>p.id!==id);await saveData("products",PRODUCTS);notify("O'chirildi","#ef4444");renderSettings();
+}
 
-window.clearDay = async () => {
-  if(!confirm("Barcha kun ma'lumotlari o'chiriladi!")) return;
-  window.history=[];window.expenses=[];window.cashSales=[];window.kassaOrders=[];
-  await saveHistory();await saveExpenses();await saveCashSales();
-  notify("Kun tozalandi","#ef4444");
-  renderSettings();
-};
+async function clearDay(){
+  if(!confirm("Barcha kun ma'lumotlari o'chiriladi!"))return;
+  history=[];expenses=[];cashSales=[];kassaOrders=[];
+  await saveData("history",[]);await saveData("expenses",[]);await saveData("cashSales",[]);
+  notify("Kun tozalandi","#ef4444");renderSettings();
+}
 
-// Avtomatik yangilash
+// TIMER
 setInterval(()=>{
-  if(!document.getElementById("page-dashboard").classList.contains("hidden")) renderDashboard();
-  if(!document.getElementById("page-room").classList.contains("hidden")) renderRoom();
+  if(!document.getElementById("page-dashboard").classList.contains("hidden"))renderDashboard();
+  if(!document.getElementById("page-room").classList.contains("hidden"))renderRoom();
 },30000);
 
-init();
+// START
+listenAll();
+goPage("dashboard");
 </script>
 </body>
 </html>
