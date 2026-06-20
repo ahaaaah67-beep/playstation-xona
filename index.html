@@ -94,17 +94,47 @@ input,select{width:100%;background:#0a0f1e;border:1px solid #334155;border-radiu
 .price-edit-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1e293b;font-size:13px}
 .price-input{width:90px;margin:0;padding:7px 8px;font-size:13px;text-align:right}
 .tab-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.login-box{background:#111827;border-radius:20px;padding:28px 22px;margin-top:80px}
+.login-logo{font-size:48px;text-align:center;margin-bottom:8px}
+.login-title{font-size:20px;font-weight:800;text-align:center;color:#c7d2fe;margin-bottom:4px}
+.login-sub{font-size:13px;color:#64748b;text-align:center;margin-bottom:24px}
+.guest-link{text-align:center;margin-top:16px}
+.guest-link button{background:none;border:none;color:#818cf8;font-size:13px;text-decoration:underline}
+.role-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+.role-owner{background:#7c3aed33;color:#c4b5fd}
+.role-guest{background:#33415533;color:#94a3b8}
+.time-mode-row{display:flex;gap:8px;margin-bottom:10px}
+.time-mode-btn{flex:1;border:1px solid #334155;border-radius:10px;padding:9px 0;color:#fff;font-size:12px;font-weight:600;background:#1e293b}
+.time-mode-btn.active{background:#6366f1;border-color:#818cf8}
 </style>
 </head>
 <body>
 <div id="notif" class="hidden notif"></div>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page">
+  <div class="login-box">
+    <div class="login-logo">🎮</div>
+    <div class="login-title">PlayStation Boshqaruv</div>
+    <div class="login-sub">Tizimga kirish</div>
+    <input type="text" id="login-user" placeholder="Login"/>
+    <input type="password" id="login-pass" placeholder="Parol"/>
+    <button class="btn-green" onclick="tryLogin()">🔑 Kirish (Egasi)</button>
+    <div class="guest-link">
+      <button onclick="enterAsGuest()">👁 Mehmon sifatida kuzatish</button>
+    </div>
+  </div>
+</div>
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page hidden">
   <div class="header">
     <div><div class="logo">🎮 PlayStation</div><div class="logo-sub" id="dash-branch-label">Chelsea 1</div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-      <div class="clock" id="dash-clock"></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="clock" id="dash-clock"></span>
+        <span class="role-tag" id="role-tag">👁 Mehmon</span>
+      </div>
       <div class="active-tag" id="dash-active">0 faol xona</div>
     </div>
   </div>
@@ -145,6 +175,16 @@ input,select{width:100%;background:#0a0f1e;border:1px solid #334155;border-radiu
       <div style="font-size:72px">🎮</div>
       <div class="empty-text">Xona bo'sh</div>
       <div class="empty-sub">Mijoz kelganda bosing</div>
+    </div>
+    <div class="section" style="margin-top:16px">
+      <div class="sec-title">⏱ Boshlanish vaqti</div>
+      <div class="time-mode-row">
+        <button class="time-mode-btn active" id="time-mode-now" onclick="setTimeMode('now')">Hozir</button>
+        <button class="time-mode-btn" id="time-mode-custom" onclick="setTimeMode('custom')">Vaqt belgilash</button>
+      </div>
+      <div id="custom-time-wrap" class="hidden">
+        <input type="time" id="custom-time-input"/>
+      </div>
       <button class="big-open" onclick="openRoom()">✅ Xonani Ochish</button>
     </div>
   </div>
@@ -298,6 +338,9 @@ input,select{width:100%;background:#0a0f1e;border:1px solid #334155;border-radiu
   <div class="section">
     <button class="btn-red" onclick="clearDay()">🗑️ Kunni Yakunlash & Tozalash</button>
   </div>
+  <div class="section">
+    <button class="btn-gray" style="width:100%" onclick="logout()">🚪 Chiqish</button>
+  </div>
   <div class="bottom-nav">
     <button class="nav-btn" onclick="goPage('dashboard')"><span class="nav-icon">🏠</span>Bosh</button>
     <button class="nav-btn" onclick="goPage('kassa')"><span class="nav-icon">💵</span>Kassa</button>
@@ -401,6 +444,10 @@ let expenses=[],cashSales=[],history=[];
 let selRoom=null,activeRoomCat=CATS[0],kassaCat=CATS[0],kassaOrders=[],expType="bozorlik",newProdCat=CATS[0];
 let currentBranch="chelsea1";
 let priceTab="chelsea1";
+let userRole=null; // "owner" | "guest"
+let timeMode="now"; // "now" | "custom"
+const OWNER_LOGIN="Mamadaliyev_Maxsadbek";
+const OWNER_PASS="Chelsea1_2";
 
 // ── HELPERS ──────────────────────────────────────────────────────────────
 const fmt=n=>Number(n).toLocaleString("uz-UZ")+" so'm";
@@ -481,8 +528,91 @@ function setBranch(b){
   renderDashboard();
 }
 
+// ── AUTH ─────────────────────────────────────────────────────────────────
+function tryLogin(){
+  const u=document.getElementById("login-user").value.trim();
+  const p=document.getElementById("login-pass").value;
+  if(u===OWNER_LOGIN&&p===OWNER_PASS){
+    userRole="owner";
+    sessionStorage.setItem("ps_role","owner");
+    enterApp();
+  } else {
+    notify("Login yoki parol noto'g'ri ❌","#ef4444");
+  }
+}
+
+function enterAsGuest(){
+  userRole="guest";
+  sessionStorage.setItem("ps_role","guest");
+  enterApp();
+}
+
+function logout(){
+  userRole=null;
+  sessionStorage.removeItem("ps_role");
+  document.getElementById("login-user").value="";
+  document.getElementById("login-pass").value="";
+  document.getElementById("page-login").classList.remove("hidden");
+  ["dashboard","room","kassa","report","settings"].forEach(id=>document.getElementById("page-"+id).classList.add("hidden"));
+}
+
+function enterApp(){
+  document.getElementById("page-login").classList.add("hidden");
+  const tag=document.getElementById("role-tag");
+  if(userRole==="owner"){
+    tag.textContent="🔑 Egasi";
+    tag.className="role-tag role-owner";
+  } else {
+    tag.textContent="👁 Mehmon";
+    tag.className="role-tag role-guest";
+  }
+  setBranch("chelsea1");
+  listenAll();
+  goPage("dashboard");
+}
+
+function isOwner(){return userRole==="owner";}
+
+function guardOwnerAction(){
+  if(!isOwner()){
+    notify("Faqat egasi o'zgartira oladi 🔒","#ef4444");
+    return false;
+  }
+  return true;
+}
+
+// ── VAQT TANLASH ─────────────────────────────────────────────────────────
+function setTimeMode(m){
+  timeMode=m;
+  document.getElementById("time-mode-now").classList.toggle("active",m==="now");
+  document.getElementById("time-mode-custom").classList.toggle("active",m==="custom");
+  document.getElementById("custom-time-wrap").classList.toggle("hidden",m!=="custom");
+  if(m==="custom"){
+    const now=new Date();
+    const hh=String(now.getHours()).padStart(2,"0");
+    const mm=String(now.getMinutes()).padStart(2,"0");
+    document.getElementById("custom-time-input").value=hh+":"+mm;
+  }
+}
+
+function getStartTimeISO(){
+  if(timeMode==="now")return new Date().toISOString();
+  const val=document.getElementById("custom-time-input").value; // "HH:MM"
+  if(!val)return new Date().toISOString();
+  const [h,m]=val.split(":").map(Number);
+  const d=new Date();
+  d.setHours(h,m,0,0);
+  if(d.getTime()>Date.now())d.setDate(d.getDate()-1); // agar kelajak vaqt bo'lsa, kechagi kun deb hisoblanadi
+  return d.toISOString();
+}
+
 // ── NAV ──────────────────────────────────────────────────────────────────
 function goPage(p){
+  if(!userRole)return;
+  if((p==="report"||p==="settings")&&!isOwner()){
+    notify("Bu bo'lim faqat egasi uchun 🔒","#ef4444");
+    return;
+  }
   ["dashboard","room","kassa","report","settings"].forEach(id=>document.getElementById("page-"+id).classList.add("hidden"));
   document.getElementById("page-"+p).classList.remove("hidden");
   if(p==="dashboard")renderDashboard();
@@ -573,24 +703,31 @@ function renderRoomProducts(){
 }
 
 async function addRoomOrder(prod){
+  if(!guardOwnerAction())return;
   const r=rooms[selRoom];const orders=r.orders||[];const ex=orders.find(o=>o.id===prod.id);
   rooms[selRoom]={...r,orders:ex?orders.map(o=>o.id===prod.id?{...o,qty:o.qty+1}:o):[...orders,{...prod,qty:1}]};
   await saveRoom(selRoom);renderRoom();
 }
 
 async function chRoomQty(pid,d){
+  if(!guardOwnerAction())return;
   const r=rooms[selRoom];
   rooms[selRoom]={...r,orders:(r.orders||[]).map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0)};
   await saveRoom(selRoom);renderRoom();
 }
 
 async function openRoom(){
+  if(!guardOwnerAction())return;
   const cfg=ROOM_CONFIG.find(r=>r.id===selRoom);
-  rooms[selRoom]={active:true,startTime:new Date().toISOString(),orders:[],price:cfg.price};
-  await saveRoom(selRoom);notify("Xona "+cfg.label+" ochildi ✅");renderRoom();
+  const startISO=getStartTimeISO();
+  rooms[selRoom]={active:true,startTime:startISO,orders:[],price:cfg.price};
+  await saveRoom(selRoom);notify("Xona "+cfg.label+" ochildi ✅");
+  timeMode="now";
+  renderRoom();
 }
 
 function showConfirm(){
+  if(!guardOwnerAction())return;
   document.getElementById("room-close-btn-wrap").style.display="none";
   document.getElementById("room-confirm").classList.remove("hidden");
   document.getElementById("c-game").textContent=fmt(rGame(selRoom));
@@ -654,6 +791,7 @@ function renderKassa(){
 function chKassaQty(pid,d){kassaOrders=kassaOrders.map(o=>o.id===pid?{...o,qty:o.qty+d}:o).filter(o=>o.qty>0);renderKassa();}
 
 async function confirmCashSale(){
+  if(!guardOwnerAction())return;
   if(kassaOrders.length===0)return;
   const total=kassaOrders.reduce((s,o)=>s+o.price*o.qty,0);
   cashSales.unshift({orders:[...kassaOrders],total,date:dateStr(),branch:currentBranch});
@@ -661,6 +799,7 @@ async function confirmCashSale(){
 }
 
 async function addClickExpense(){
+  if(!guardOwnerAction())return;
   const val=Number(document.getElementById("click-exp-input").value);if(!val)return;
   expenses.unshift({type:"click",branch:currentBranch,name:"Click orqali to'landi",amount:val,date:dateStr()});
   await saveData("expenses",expenses);document.getElementById("click-exp-input").value="";notify("Click xarajat qo'shildi 💳","#7c3aed");
@@ -671,6 +810,7 @@ function setExpType(t){
 }
 
 async function addExpense(){
+  if(!guardOwnerAction())return;
   const name=document.getElementById("exp-name").value.trim();const amount=Number(document.getElementById("exp-amount").value);
   if(!name||!amount)return;
   expenses.unshift({type:expType,branch:currentBranch,name,amount,date:dateStr()});await saveData("expenses",expenses);
@@ -786,9 +926,12 @@ setInterval(()=>{
 },30000);
 
 // ── START ────────────────────────────────────────────────────────────────
-setBranch("chelsea1");
-listenAll();
-goPage("dashboard");
+// ── START ────────────────────────────────────────────────────────────────
+const savedRole=sessionStorage.getItem("ps_role");
+if(savedRole==="owner"||savedRole==="guest"){
+  userRole=savedRole;
+  enterApp();
+}
 </script>
 </body>
 </html>
