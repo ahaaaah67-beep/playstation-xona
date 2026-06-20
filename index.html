@@ -304,6 +304,15 @@ input,select{width:100%;background:#0a0f1e;border:1px solid #334155;border-radiu
   <div class="section" id="cash-sales-wrap" style="display:none"><div class="sec-title">💵 Naqd Sotuvlar</div><div id="cash-sales-list"></div></div>
   <div class="section" id="history-wrap" style="display:none"><div class="sec-title">🎮 Sessiyalar</div><div id="history-list"></div></div>
   <div id="report-empty" class="centered"><div style="font-size:56px">📋</div><div class="empty-text">Hali ma'lumot yo'q</div></div>
+
+  <div class="section" style="background:#1a1530">
+    <div class="sec-title">📦 Arxiv — Oylik / Yillik</div>
+    <div class="grid4" style="margin-bottom:10px">
+      <div class="stat-card" style="border-color:#f59e0b"><div class="stat-label">Shu oy foyda</div><div class="stat-val" style="color:#f59e0b" id="archive-month-total">0</div><div class="stat-sub">so'm</div></div>
+      <div class="stat-card" style="border-color:#06b6d4"><div class="stat-label">Shu yil foyda</div><div class="stat-val" style="color:#06b6d4" id="archive-year-total">0</div><div class="stat-sub">so'm</div></div>
+    </div>
+    <div id="archive-list"></div>
+  </div>
   <div class="bottom-nav">
     <button class="nav-btn" onclick="goPage('dashboard')"><span class="nav-icon">🏠</span>Bosh</button>
     <button class="nav-btn" onclick="goPage('kassa')"><span class="nav-icon">💵</span>Kassa</button>
@@ -568,6 +577,7 @@ function enterApp(){
   }
   setBranch("chelsea1");
   listenAll();
+  listenArchive();
   goPage("dashboard");
 }
 
@@ -820,6 +830,7 @@ async function addExpense(){
 // ── HISOBOT ──────────────────────────────────────────────────────────────
 function renderReport(){
   document.getElementById("report-clock").textContent=timeNow();updateStats();
+  renderArchive();
   const branchExp=expenses.filter(e=>e.branch===currentBranch);
   const branchCash=cashSales.filter(c=>c.branch===currentBranch);
   const branchHist=history.filter(h=>h.branch===currentBranch);
@@ -913,10 +924,96 @@ async function removeProduct(id){
 }
 
 async function clearDay(){
-  if(!confirm("Barcha kun ma'lumotlari o'chiriladi!"))return;
-  history=[];expenses=[];cashSales=[];kassaOrders=[];
-  await saveData("history",[]);await saveData("expenses",[]);await saveData("cashSales",[]);
-  notify("Kun tozalandi","#ef4444");renderSettings();
+  if(!guardOwnerAction())return;
+  if(!confirm("Bugungi kun yakunlanadi va arxivga saqlanadi. Davom etilsinmi?"))return;
+
+  // Joriy filial bo'yicha kunlik yig'indi
+  const branchHist=history.filter(h=>h.branch===currentBranch);
+  const branchCash=cashSales.filter(c=>c.branch===currentBranch);
+  const branchExp=expenses.filter(e=>e.branch===currentBranch);
+
+  const xona=branchHist.reduce((s,h)=>s+h.total,0);
+  const naqd=branchCash.reduce((s,c)=>s+c.total,0);
+  const exp=branchExp.reduce((s,e)=>s+e.amount,0);
+
+  const today=new Date();
+  const dateKey=today.toISOString().slice(0,10); // YYYY-MM-DD
+
+  const archiveEntry={
+    date:dateKey,
+    dateLabel:today.toLocaleDateString("uz-UZ"),
+    branch:currentBranch,
+    xonaRevenue:xona,
+    cashRevenue:naqd,
+    expenses:exp,
+    profit:xona+naqd-exp,
+    roomSessions:branchHist.length,
+    cashSalesCount:branchCash.length,
+    history:branchHist,
+    cashSales:branchCash,
+    expenseList:branchExp,
+    closedAt:dateStr()
+  };
+
+  // Arxivga qo'shish
+  let archive=[];
+  try{
+    const snap=await db.collection("data").doc("archive").get();
+    if(snap.exists)archive=snap.data().list||[];
+  }catch(e){console.log(e);}
+  archive.unshift(archiveEntry);
+  await saveData("archive",archive);
+
+  // Joriy ma'lumotlardan shu filialga tegishlilarini tozalash (boshqa filial saqlanadi)
+  history=history.filter(h=>h.branch!==currentBranch);
+  cashSales=cashSales.filter(c=>c.branch!==currentBranch);
+  expenses=expenses.filter(e=>e.branch!==currentBranch);
+  await saveData("history",history);
+  await saveData("cashSales",cashSales);
+  await saveData("expenses",expenses);
+
+  notify("Kun yakunlandi va arxivga saqlandi 📦","#22c55e");
+  renderSettings();
+  renderArchive();
+}
+
+// ── ARXIV (OYLIK/YILLIK) ───────────────────────────────────────────────
+let archiveData=[];
+function listenArchive(){
+  db.collection("data").doc("archive").onSnapshot(snap=>{
+    if(snap.exists)archiveData=snap.data().list||[];
+    renderArchive();
+  });
+}
+
+function renderArchive(){
+  const el=document.getElementById("archive-list");
+  if(!el)return;
+  const branchArchive=archiveData.filter(a=>a.branch===currentBranch);
+  if(branchArchive.length===0){
+    el.innerHTML='<div style="text-align:center;color:#475569;padding:20px 0;font-size:13px">Hali yakunlangan kun yo\'q</div>';
+    document.getElementById("archive-month-total").textContent="0";
+    document.getElementById("archive-year-total").textContent="0";
+    return;
+  }
+  // Oylik va yillik jamlanma
+  const now=new Date();
+  const curMonth=now.toISOString().slice(0,7); // YYYY-MM
+  const curYear=now.getFullYear();
+  const monthTotal=branchArchive.filter(a=>a.date.startsWith(curMonth)).reduce((s,a)=>s+a.profit,0);
+  const yearTotal=branchArchive.filter(a=>new Date(a.date).getFullYear()===curYear).reduce((s,a)=>s+a.profit,0);
+  document.getElementById("archive-month-total").textContent=fmtS(monthTotal);
+  document.getElementById("archive-year-total").textContent=fmtS(yearTotal);
+
+  el.innerHTML="";
+  branchArchive.forEach(a=>{
+    const div=document.createElement("div");
+    div.className="hist-card";
+    div.innerHTML=`<div class="hist-head"><span>📅 ${a.dateLabel}</span><span style="color:#f59e0b;font-weight:700">${fmt(a.profit)}</span></div>
+      <div class="hist-row"><span>🎮 Xona: ${fmt(a.xonaRevenue)}</span><span>💵 Naqd: ${fmt(a.cashRevenue)}</span></div>
+      <div class="hist-row"><span>💸 Xarajat: ${fmt(a.expenses)}</span><span>🎮 ${a.roomSessions} ta sessiya</span></div>`;
+    el.appendChild(div);
+  });
 }
 
 // ── TIMER ────────────────────────────────────────────────────────────────
